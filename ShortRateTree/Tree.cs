@@ -57,7 +57,14 @@ namespace ShortRateTree
                 _TreeBackBones[i].V = ComputeV(a[i], sigma[i], _TreeBackBones[i].dt);
             }
         }
-
+        /// <summary>
+        /// ツリーノードの構築
+        /// 遷移確率が0となるノードができる条件のとき、作成自体は行う。
+        /// 作成しないようにすることももちろんできる。
+        /// が、そのような条件自体が実用上はほぼないと思われる。
+        /// また、後のフォワードインダクションやバックワードインダクションのときにも、
+        /// 求めようとする値の初期化により支障なく計算可能である（はず）。
+        /// </summary>
         public void SetUpTreeNodes()
         {
             /// Root Node
