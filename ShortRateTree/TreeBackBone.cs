@@ -7,22 +7,26 @@ using System.Threading.Tasks;
 namespace ShortRateTree
 {
     /// <summary>
-    /// 32Byte
+    /// 52Byte
     /// </summary>
     public class TreeBackBone
     {
+        public double t;
+        public double a;
+        public double sigma;
         public double V;
         public double dx;
         public double dt;
         public double alpha;
-
+        public short jMin;
+        public short jMax;
         public static string ToStringValuesHeader()
         {
-            return string.Format("dt,dx,V,alpha");
+            return string.Format("t,a,sigma,dt,dx,V,alpha,jMin,jMax");
         }
         public string ToStringValues()
         {
-            return string.Format("{0}, {1}, {2}, {3}", dt, dx, V, alpha);
+            return string.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}", t, a, sigma, dt, dx, V, alpha, jMin, jMax);
         }
     }
 }

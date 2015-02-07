@@ -19,6 +19,38 @@ namespace ShortRateTree
         public double Q;
         public double r;
 
+        /// <summary>
+        /// 初期化 : 遷移に関する量を設定する
+        /// </summary>
+        /// <param name="j"></param>
+        /// <param name="dx"></param>
+        /// <param name="expMinusADeltaT"></param>
+        /// <param name="dxForNextTime"></param>
+        /// <param name="V"></param>
+        /// <param name="V2"></param>
+        public void Initialize(short j, double dx, double expMinusADeltaT, double dxForNextTime, double V, double V2 )
+        {
+            this.j = j;
+            double x = j * dx;
+            double m = x * expMinusADeltaT;
+            this.k = (short)Math.Round(m / dxForNextTime, MidpointRounding.AwayFromZero);
+            double eta = m - x;
+            double etaSquaredOverSixTimesVSquared = eta * eta / (6 * V2);
+            double etaOverTwoTimesVTimesSqrt3 = eta / (2 * Math.Sqrt(3) * V);
+            this.pu = (1D / 6D) + etaSquaredOverSixTimesVSquared + etaOverTwoTimesVTimesSqrt3; 
+            this.pm = (2D / 3D) - 2 * etaSquaredOverSixTimesVSquared;
+            this.pd = (1D / 6D) + etaSquaredOverSixTimesVSquared - etaOverTwoTimesVTimesSqrt3; 
+        }
+        /// <summary>
+        /// 最終時点ノード用初期化
+        /// </summary>
+        /// <param name="j"></param>
+        /// <param name="dx"></param>
+        public void InitializeLeafNode(short j, double dx)
+        {
+            this.j = j;
+            double x = j * dx;
+        }
         public static string ToStringValuesHeader()
         {
             return string.Format("j,k,pu,pm,pd,Q,r");
