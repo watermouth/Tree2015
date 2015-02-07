@@ -9,7 +9,7 @@ namespace ShortRateTree
     /// <summary>
     /// 44Byte
     /// </summary>
-    public struct TreeNode
+    public class TreeNode
     {
         public short j;
         public short k;
@@ -18,5 +18,14 @@ namespace ShortRateTree
         public double pd;
         public double Q;
         public double r;
+
+        public static string ToStringValuesHeader()
+        {
+            return string.Format("j,k,pu,pm,pd,Q,r");
+        }
+        public string ToStringValues()
+        {
+            return string.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}", j, k, pu, pm, pd, Q, r); 
+        }
     }
 }

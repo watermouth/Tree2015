@@ -16,6 +16,7 @@ namespace ShortRateTree
         {
             Debug.Assert(times != null && times.Length > 1);
             _times = (double[])times.Clone();
+            _TreeBackBones = new TreeBackBone[GetTimeSeparationNumber()];
         }
 
         /// <summary>
@@ -36,17 +37,29 @@ namespace ShortRateTree
             Debug.Assert(a.Length == GetTimeSeparationNumber()
                 && sigma.Length == GetTimeSeparationNumber());
             /// 0, 1, ..., N 時点 分割数はN : N分割するとき、back boneはN個用いる
-            _TreeBackBones = new TreeBackBone[GetTimeSeparationNumber()];
-            /// i = 0
+            _TreeBackBones[0] = new TreeBackBone();
             _TreeBackBones[0].dt = _times[1] - _times[0];
             _TreeBackBones[0].dx = 0;
             _TreeBackBones[0].V = ComputeV(a[0], sigma[0], _TreeBackBones[0].dt);
             /// i = 1, ..., N
             for (int i = 1; i < GetTimeSeparationNumber(); ++i)
             {
+                _TreeBackBones[i] = new TreeBackBone();
                 _TreeBackBones[i].dt = _times[i + 1] - _times[i];
                 _TreeBackBones[i].dx = _TreeBackBones[i - 1].V * Math.Sqrt(3);
                 _TreeBackBones[i].V = ComputeV(a[i], sigma[i], _TreeBackBones[i].dt);
+            }
+        }
+
+        public void OutputCsvTreeBackBones(string filepath)
+        {
+            using (var sw = new System.IO.StreamWriter(filepath, false))
+            {
+                sw.WriteLine(TreeBackBone.ToStringValuesHeader());
+                for (int i = 0; i < _TreeBackBones.Length; ++i)
+                {
+                    sw.WriteLine(_TreeBackBones[i].ToStringValues());
+                }
             }
         }
     }

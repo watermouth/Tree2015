@@ -15,5 +15,14 @@ namespace ShortRateTree
         public double dx;
         public double dt;
         public double alpha;
+
+        public static string ToStringValuesHeader()
+        {
+            return string.Format("dt,dx,V,alpha");
+        }
+        public string ToStringValues()
+        {
+            return string.Format("{0}, {1}, {2}, {3}", dt, dx, V, alpha);
+        }
     }
 }
