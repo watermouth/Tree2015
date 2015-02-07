@@ -9,11 +9,11 @@ namespace ShortRateTree
     /// <summary>
     /// 32Byte
     /// </summary>
-    struct TreeBackBone
+    class TreeBackBone
     {
-        double V;
-        double dx;
-        double dt;
-        double alpha;
+        public double V;
+        public double dx;
+        public double dt;
+        public double alpha;
     }
 }

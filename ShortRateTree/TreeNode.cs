@@ -11,12 +11,12 @@ namespace ShortRateTree
     /// </summary>
     struct TreeNode
     {
-        short j;
-        short k;
-        double pu;
-        double pm;
-        double pd;
-        double Q;
-        double r;
+        public short j;
+        public short k;
+        public double pu;
+        public double pm;
+        public double pd;
+        public double Q;
+        public double r;
     }
 }
