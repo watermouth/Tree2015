@@ -9,7 +9,7 @@ namespace ShortRateTree
     /// <summary>
     /// 32Byte
     /// </summary>
-    class TreeBackBone
+    public class TreeBackBone
     {
         public double V;
         public double dx;

@@ -9,7 +9,7 @@ namespace ShortRateTree
     /// <summary>
     /// 44Byte
     /// </summary>
-    struct TreeNode
+    public struct TreeNode
     {
         public short j;
         public short k;
