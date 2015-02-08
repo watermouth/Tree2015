@@ -157,7 +157,6 @@ namespace ShortRateTree
             TreeBackBone bone = _TreeBackBones[i];
             TreeNode[] nodes = _TreeNodes[i];
             int nodeCount = bone.jMax - bone.jMin + 1;
-            bone.bondPrice = bondPrice;
             /// i時点の各ノードに対するQ値の初期化
             for (int j = 0; j < nodeCount; ++j) { nodes[j].Q = 0; }
             /// Q値の計算
@@ -186,8 +185,8 @@ namespace ShortRateTree
             {
                 bone.alpha = Math.Log(-Math.Log(price, Math.E) / bone.dt, Math.E);
                 double dummy;
-                ComputeBondPrice(0, out dummy);
-                ComputeBondPrice(1, out dummy);
+                bone.bondPrice = ComputeBondPrice(0, out dummy);
+                _TreeBackBones[1].bondPrice = ComputeBondPrice(1, out dummy);
                 return 0D;
             }
             /// Newtow法
@@ -205,6 +204,7 @@ namespace ShortRateTree
                 priceByTree = ComputeBondPrice(i + 1, out derivative);
                 bone.alpha = bone.alpha - (priceByTree - price) / derivative;
             } while (Math.Abs(priceByTree - price) > error);
+            _TreeBackBones[i + 1].bondPrice = priceByTree;
             return Math.Abs(priceByTree - price);
         }
         public void OutputCsvTreeBackBones(string filepath)
