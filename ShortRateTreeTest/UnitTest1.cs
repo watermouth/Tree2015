@@ -64,7 +64,7 @@ namespace UnitTestProject1
         public void TestMethod3()
         {
             int sepNum = 1100;
-            double dt = 0.1;
+            double dt = 1D/64;
             double r = 0.01;
             double[] times = Enumerable.Range(0, sepNum+1).Select(x => x*dt).ToArray();
             double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();

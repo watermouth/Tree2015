@@ -33,13 +33,14 @@ namespace ShortRateTree
             this.j = j;
             double x = j * dx;
             double m = x * expMinusADeltaT;
-            this.k = (short)Math.Round(m / dxForNextTime, MidpointRounding.AwayFromZero);
+            /// dxとdxForNextTimeのdouble精度外の誤差の影響を小さくするためdx/dxForNextTimeを明示的に計算する
+            this.k = (short)Math.Round(j * expMinusADeltaT * dx / dxForNextTime, MidpointRounding.AwayFromZero);
             double eta = m - x;
             double etaSquaredOverSixTimesVSquared = eta * eta / (6 * V2);
             double etaOverTwoTimesVTimesSqrt3 = eta / (2 * Math.Sqrt(3) * V);
             this.pu = (1D / 6D) + etaSquaredOverSixTimesVSquared + etaOverTwoTimesVTimesSqrt3; 
             this.pm = (2D / 3D) - 2 * etaSquaredOverSixTimesVSquared;
-            this.pd = (1D / 6D) + etaSquaredOverSixTimesVSquared - etaOverTwoTimesVTimesSqrt3; 
+            this.pd = (1D / 6D) + etaSquaredOverSixTimesVSquared - etaOverTwoTimesVTimesSqrt3;
         }
         /// <summary>
         /// 最終時点ノード用初期化
