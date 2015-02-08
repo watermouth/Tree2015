@@ -63,7 +63,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod3()
         {
-            int sepNum = 120;
+            int sepNum = 1100;
             double dt = 0.1;
             double r = 0.01;
             double[] times = Enumerable.Range(0, sepNum+1).Select(x => x*dt).ToArray();
