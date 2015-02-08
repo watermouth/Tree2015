@@ -112,6 +112,44 @@ namespace ShortRateTree
                 preNodeCount = nodeCount;
             }
         }
+        /// <summary>
+        ///  1つの時点に対する全ノードのQ値を計算し、ツリーによる割引債価格を算出する
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public double ComputeBondPrice(int i)
+        {
+            if (i == 0) {
+                _TreeNodes[0][0].Q = 1D; 
+                return 1D;
+            }
+            /// 1時点前のデータ
+            TreeBackBone pBone = _TreeBackBones[i - 1];
+            TreeNode[] pNodes = _TreeNodes[i - 1];
+            int pNodeCount = pBone.jMax - pBone.jMin + 1;
+            /// i時点データ
+            TreeBackBone bone = _TreeBackBones[i];
+            TreeNode[] nodes = _TreeNodes[i];
+            int nodeCount = bone.jMax - bone.jMin + 1;
+            /// i時点の各ノードに対するQ値の初期化
+            for (int j = 0; j < nodeCount; ++j) { nodes[j].Q = 0; }
+            /// 1時点前のノードを走査して, i時点の各ノードに対するQ値を一度に計算する
+            /// Q値の計算
+            for (int j = 0; j < pNodeCount; ++j)
+            {
+                /// down, mid, up nodeの順に集計
+                nodes[(pNodes[j].k - 1)].Q += pNodes[j].Q * pNodes[j].pd * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
+                nodes[(pNodes[j].k)].Q += pNodes[j].Q * pNodes[j].pm * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
+                nodes[(pNodes[j].k + 1)].Q += pNodes[j].Q * pNodes[j].pu * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
+            }
+            /// BondPrice
+            double bondPrice = 0;
+            for (int j = 0; j < nodeCount;++j)
+            {
+                bondPrice += nodes[j].Q;
+            }
+            return bondPrice;
+        }
         public void OutputCsvTreeBackBones(string filepath)
         {
             using (var sw = new System.IO.StreamWriter(filepath, false))
