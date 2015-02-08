@@ -149,15 +149,18 @@ namespace ShortRateTree
                 nodes[kIndex].Q += pNodes[j].pm * temp;
                 nodes[kIndex + 1].Q += pNodes[j].pu * temp; 
             }
-            /// BondPrice
+            /// BondPrice BK tree
             double bondPrice = 0;
             for (int j = 0; j < nodeCount; ++j)
             {
                 double commonTerm = Math.Exp(bone.alpha * nodes[j].j * bone.dx) * bone.dt;
                 double priceTerm = nodes[j].Q * Math.Exp(-commonTerm);
                 bondPrice += priceTerm;
-                priceDerivativeAlpha -= priceTerm * commonTerm;
+                priceDerivativeAlpha += priceTerm * commonTerm;
             }
+            /// BondPrice BK tree
+            /// 価格の微分係数そのものにしておくため, マイナスをつける
+            priceDerivativeAlpha = -priceDerivativeAlpha;
             return bondPrice;
         }
         public void OutputCsvTreeBackBones(string filepath)
