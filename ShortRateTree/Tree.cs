@@ -140,9 +140,10 @@ namespace ShortRateTree
             {
                 /// down, mid, up nodeの順に集計
                 int kIndex = pNodes[j].k - bone.jMin;
-                nodes[kIndex - 1].Q += pNodes[j].Q * pNodes[j].pd * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
-                nodes[kIndex].Q += pNodes[j].Q * pNodes[j].pm * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
-                nodes[kIndex + 1].Q += pNodes[j].Q * pNodes[j].pu * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
+                double temp = pNodes[j].Q * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
+                nodes[kIndex - 1].Q += pNodes[j].pd * temp;
+                nodes[kIndex].Q += pNodes[j].pm * temp;
+                nodes[kIndex + 1].Q += pNodes[j].pu * temp; 
             }
             /// BondPrice
             double bondPrice = 0;

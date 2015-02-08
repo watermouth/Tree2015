@@ -42,5 +42,24 @@ namespace UnitTestProject1
             }
             tree.OutputCsvTreeNodes("TestMethod2C.csv");
         }
+        /// <summary>
+        /// many time steps
+        /// </summary>
+        [TestMethod]
+        public void TestMethod3()
+        {
+            int sepNum = 1001;
+            double dt = 0.1;
+            double[] times = Enumerable.Range(0, sepNum+1).Select(x => x*dt).ToArray();
+            double[] a = Enumerable.Range(0, times.Length-1).Select(x => 0.005).ToArray();
+            double[] sigma  = Enumerable.Range(0, times.Length-1).Select(x => 0.5).ToArray();
+            ShortRateTree.Tree tree = new Tree(times);
+            tree.InitializeBackBones(a, sigma);
+            tree.SetUpTreeNodes();
+            for (int i = 0; i < times.Length-1; ++i)
+            {
+                tree.ComputeBondPrice(i);
+            }
+        }
     }
 }
