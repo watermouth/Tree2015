@@ -29,6 +29,8 @@ namespace UnitTestProject1
         public void TestMethod2()
         {
             double[] times = { 0, 0.01, 0.1, 0.11, 0.2, 1.0, 10.0, 10.1, 11.0, 20.0, 100, 101};
+            double r = 0.01;
+            double[] bondPrices = Enumerable.Range(0, times.Length).Select(x => Math.Exp(-r * x)).ToArray();
             double[] a = Enumerable.Range(0, times.Length-1).Select(x => 0.005).ToArray();
             double[] sigma  = Enumerable.Range(0, times.Length-1).Select(x => 0.5).ToArray();
             ShortRateTree.Tree tree = new Tree(times);
@@ -38,10 +40,10 @@ namespace UnitTestProject1
             tree.OutputCsvTreeBackBones("TestMethod2B.csv");
             for (int i = 0; i < times.Length-1; ++i)
             {
-                double priceDerivativeAlpha;
-                tree.ComputeBondPrice(i, out priceDerivativeAlpha);
+                tree.FitToInputBondPrice(i, bondPrices[i+1]);
             }
-            tree.OutputCsvTreeNodes("TestMethod2C.csv");
+            tree.OutputCsvTreeBackBones("TestMethod2C.csv");
+            tree.OutputCsvTreeNodes("TestMethod2D.csv");
         }
         /// <summary>
         /// many time steps
@@ -51,7 +53,9 @@ namespace UnitTestProject1
         {
             int sepNum = 1001;
             double dt = 0.1;
+            double r = 0.01;
             double[] times = Enumerable.Range(0, sepNum+1).Select(x => x*dt).ToArray();
+            double[] bondPrices = Enumerable.Range(0, sepNum+1).Select(x => Math.Exp(-r * x * dt)).ToArray();
             double[] a = Enumerable.Range(0, times.Length-1).Select(x => 0.005).ToArray();
             double[] sigma  = Enumerable.Range(0, times.Length-1).Select(x => 0.5).ToArray();
             ShortRateTree.Tree tree = new Tree(times);

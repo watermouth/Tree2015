@@ -147,7 +147,7 @@ namespace ShortRateTree
                 double temp = pNodes[j].Q * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
                 nodes[kIndex - 1].Q += pNodes[j].pd * temp;
                 nodes[kIndex].Q += pNodes[j].pm * temp;
-                nodes[kIndex + 1].Q += pNodes[j].pu * temp; 
+                nodes[kIndex + 1].Q += pNodes[j].pu * temp;
             }
             /// BondPrice BK tree
             double bondPrice = 0;
@@ -162,6 +162,36 @@ namespace ShortRateTree
             /// 価格の微分係数そのものにしておくため, マイナスをつける
             priceDerivativeAlpha = -priceDerivativeAlpha;
             return bondPrice;
+        }
+        /// <summary>
+        /// 時点iのalphaを時点i+1に対するpriceに合わせる
+        /// </summary>
+        /// <param name="i"></param>
+        /// <param name="price"></param>
+        /// <returns>収束誤差</returns>
+        public double FitToInputBondPrice(int i, double price)
+        {
+            TreeBackBone bone = _TreeBackBones[i];
+            if (i == 0)
+            {
+                bone.alpha = Math.Log(-Math.Log(price, Math.E) / bone.dt, Math.E);
+                return 0D;
+            }
+            /// Newtow法
+            /// 誤差
+            double error = 1e-10;
+            /// alphaの初期値
+            bone.alpha = 1D;
+            /// treeにより算出する価格
+            double priceByTree; 
+            do
+            {
+                /// priceByTree - priceに対するalphaの微分係数
+                double derivative;
+                priceByTree = ComputeBondPrice(i, out derivative);
+                bone.alpha = bone.alpha - (priceByTree - price) / derivative;
+            } while (Math.Abs(priceByTree - price) > error);
+            return Math.Abs(priceByTree - price);
         }
         public void OutputCsvTreeBackBones(string filepath)
         {
