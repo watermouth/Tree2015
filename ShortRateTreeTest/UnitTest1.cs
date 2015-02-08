@@ -35,7 +35,12 @@ namespace UnitTestProject1
             tree.InitializeBackBones(a, sigma);
             tree.OutputCsvTreeBackBones("TestMethod2A.csv");
             tree.SetUpTreeNodes();
-            tree.OutputCsvTreeNodes("TestMethod2B.csv");
+            tree.OutputCsvTreeBackBones("TestMethod2B.csv");
+            for (int i = 0; i < times.Length-1; ++i)
+            {
+                tree.ComputeBondPrice(i);
+            }
+            tree.OutputCsvTreeNodes("TestMethod2C.csv");
         }
     }
 }
