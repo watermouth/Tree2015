@@ -139,7 +139,7 @@ namespace ShortRateTree
             double bondPrice = 0;
             for (int j = 0; j < pNodeCount; ++j)
             {
-                double commonTerm = Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt;
+                double commonTerm = ConvertToShortRate(pBone.alpha, pNodes[j].j * pBone.dx) * pBone.dt;
                 double priceTerm = pNodes[j].Q * Math.Exp(-commonTerm);
                 bondPrice += priceTerm;
                 priceDerivativeAlpha += priceTerm * commonTerm;
@@ -160,12 +160,22 @@ namespace ShortRateTree
                 /// down, mid, up nodeの順に集計
                 int kIndex = pNodes[j].k - bone.jMin;
                 /// BK tree
-                double temp = pNodes[j].Q * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
+                double temp = pNodes[j].Q * Math.Exp(-ConvertToShortRate(pBone.alpha, pNodes[j].j * pBone.dx) * pBone.dt);
                 nodes[kIndex - 1].Q += pNodes[j].pd * temp;
                 nodes[kIndex].Q += pNodes[j].pm * temp;
                 nodes[kIndex + 1].Q += pNodes[j].pu * temp;
             }
             return bondPrice;
+        }
+        /// <summary>
+        /// BK tree によるショートレートr換算処理
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        private double ConvertToShortRate(double a, double x)
+        {
+            return Math.Exp(a + x);
         }
         /// <summary>
         /// 時点iのalphaを時点i+1に対するpriceに合わせる
