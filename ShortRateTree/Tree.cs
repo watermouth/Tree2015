@@ -16,7 +16,7 @@ namespace ShortRateTree
         {
             Debug.Assert(times != null && times.Length > 1);
             _times = (double[])times.Clone();
-            _TreeBackBones = new TreeBackBone[GetTimeSeparationNumber()];
+            _TreeBackBones = new TreeBackBone[_times.Length];
             _TreeNodes = new TreeNode[_times.Length][];
         }
 
@@ -35,8 +35,7 @@ namespace ShortRateTree
 
         public void InitializeBackBones(double[] a, double[] sigma)
         {
-            Debug.Assert(a.Length == GetTimeSeparationNumber()
-                && sigma.Length == GetTimeSeparationNumber());
+            Debug.Assert(a.Length == _times.Length && sigma.Length == _times.Length);
             /// 0, 1, ..., N 時点 分割数はN : N分割するとき、back boneはN個用いる
             _TreeBackBones[0] = new TreeBackBone();
             _TreeBackBones[0].t = _times[0];
@@ -56,6 +55,14 @@ namespace ShortRateTree
                 _TreeBackBones[i].dx = _TreeBackBones[i - 1].V * Math.Sqrt(3);
                 _TreeBackBones[i].V = ComputeV(a[i], sigma[i], _TreeBackBones[i].dt);
             }
+            int ii = GetTimeSeparationNumber();
+            _TreeBackBones[ii] = new TreeBackBone();
+            _TreeBackBones[ii].t = _times[ii];
+            _TreeBackBones[ii].a = a[ii];
+            _TreeBackBones[ii].sigma = sigma[ii];
+            _TreeBackBones[ii].dt = 0;
+            _TreeBackBones[ii].dx = _TreeBackBones[ii - 1].V * Math.Sqrt(3);
+            _TreeBackBones[ii].V = ComputeV(a[ii], sigma[ii], _TreeBackBones[ii].dt);
         }
         /// <summary>
         /// ツリーノードの構築
@@ -74,9 +81,9 @@ namespace ShortRateTree
                 , _TreeBackBones[1].dx, _TreeBackBones[0].V, _TreeBackBones[0].V * _TreeBackBones[0].V);
             _TreeBackBones[0].jMin = 0;
             _TreeBackBones[0].jMax = 0;
-            /// i = 1, 2, ..., N - 1(Leaf Nodeに該当) 
+            /// i = 1, 2, ..., N (Leaf Nodeに該当) 
             int preNodeCount = 1;
-            for (short i = 1; i < GetTimeSeparationNumber(); ++i)
+            for (short i = 1; i < _times.Length; ++i)
             {
                 /// i時点のTreeBackBone
                 TreeBackBone ithBone = _TreeBackBones[i];
@@ -89,7 +96,7 @@ namespace ShortRateTree
                 _TreeNodes[i] = new TreeNode[nodeCount];
                 for (short j = 0; j < nodeCount; ++j) { _TreeNodes[i][j] = new TreeNode(); }
                 /// 最終時点より前と最終時点で分ける
-                if (i < GetTimeSeparationNumber() - 1)
+                if (i < GetTimeSeparationNumber())
                 {
                     /// j = jMin, ..., jMax に対するnodeを順に初期化する
                     /// j = jMin, ..., jMax に対応する配列index 0,1,...,nodeCount-1
@@ -113,7 +120,8 @@ namespace ShortRateTree
             }
         }
         /// <summary>
-        ///  1つの時点に対する全ノードのQ値を計算し、ツリーによる割引債価格を算出する
+        /// 計算済みの時点i-1ノードのQ値を用いてツリーによる割引債価格P(0,i)を算出する.
+        /// 引き続いて時点iに対する全ノードのQ値を計算する.
         /// </summary>
         /// <param name="i"></param>
         /// <param name="priceDerivativeAlpha">ツリーによる割引債価格のalphaによる微分係数</param>
@@ -123,21 +131,35 @@ namespace ShortRateTree
             priceDerivativeAlpha = 0;
             if (i == 0)
             {
+                _TreeBackBones[0].bondPrice = 1D;
                 _TreeNodes[0][0].Q = 1D;
                 /// priceDerivativeAlphaは使わないのでダミー0を返す
                 return 1D;
             }
-            /// i時点データ
-            TreeBackBone bone = _TreeBackBones[i];
-            TreeNode[] nodes = _TreeNodes[i];
-            int nodeCount = bone.jMax - bone.jMin + 1;
-            /// 1時点前のデータ
+            /// i-1時点データ
             TreeBackBone pBone = _TreeBackBones[i - 1];
             TreeNode[] pNodes = _TreeNodes[i - 1];
             int pNodeCount = pBone.jMax - pBone.jMin + 1;
+            /// BondPrice BK tree
+            double bondPrice = 0;
+            for (int j = 0; j < pNodeCount; ++j)
+            {
+                double commonTerm = Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt;
+                double priceTerm = pNodes[j].Q * Math.Exp(-commonTerm);
+                bondPrice += priceTerm;
+                priceDerivativeAlpha += priceTerm * commonTerm;
+            }
+            /// BondPrice BK tree
+            /// 価格の微分係数そのものにしておくため, マイナスをつける
+            priceDerivativeAlpha = -priceDerivativeAlpha;
+            /// i時点のQ値の計算
+            /// i-1時点ノードを走査して, i時点の各ノードに対するQ値を一度に計算する
+            TreeBackBone bone = _TreeBackBones[i];
+            TreeNode[] nodes = _TreeNodes[i];
+            int nodeCount = bone.jMax - bone.jMin + 1;
+            bone.bondPrice = bondPrice;
             /// i時点の各ノードに対するQ値の初期化
             for (int j = 0; j < nodeCount; ++j) { nodes[j].Q = 0; }
-            /// 1時点前のノードを走査して, i時点の各ノードに対するQ値を一度に計算する
             /// Q値の計算
             for (int j = 0; j < pNodeCount; ++j)
             {
@@ -149,18 +171,6 @@ namespace ShortRateTree
                 nodes[kIndex].Q += pNodes[j].pm * temp;
                 nodes[kIndex + 1].Q += pNodes[j].pu * temp;
             }
-            /// BondPrice BK tree
-            double bondPrice = 0;
-            for (int j = 0; j < nodeCount; ++j)
-            {
-                double commonTerm = Math.Exp(bone.alpha * nodes[j].j * bone.dx) * bone.dt;
-                double priceTerm = nodes[j].Q * Math.Exp(-commonTerm);
-                bondPrice += priceTerm;
-                priceDerivativeAlpha += priceTerm * commonTerm;
-            }
-            /// BondPrice BK tree
-            /// 価格の微分係数そのものにしておくため, マイナスをつける
-            priceDerivativeAlpha = -priceDerivativeAlpha;
             return bondPrice;
         }
         /// <summary>
@@ -175,6 +185,9 @@ namespace ShortRateTree
             if (i == 0)
             {
                 bone.alpha = Math.Log(-Math.Log(price, Math.E) / bone.dt, Math.E);
+                double dummy;
+                ComputeBondPrice(0, out dummy);
+                ComputeBondPrice(1, out dummy);
                 return 0D;
             }
             /// Newtow法
@@ -183,12 +196,13 @@ namespace ShortRateTree
             /// alphaの初期値
             bone.alpha = 1D;
             /// treeにより算出する価格
-            double priceByTree; 
+            double priceByTree;
             do
             {
                 /// priceByTree - priceに対するalphaの微分係数
                 double derivative;
-                priceByTree = ComputeBondPrice(i, out derivative);
+                /// 時点i+1の価格を計算して時点iのalphaを決定する
+                priceByTree = ComputeBondPrice(i + 1, out derivative);
                 bone.alpha = bone.alpha - (priceByTree - price) / derivative;
             } while (Math.Abs(priceByTree - price) > error);
             return Math.Abs(priceByTree - price);

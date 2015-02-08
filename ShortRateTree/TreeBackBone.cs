@@ -20,13 +20,15 @@ namespace ShortRateTree
         public double alpha;
         public short jMin;
         public short jMax;
+        public double bondPrice;
         public static string ToStringValuesHeader()
         {
-            return string.Format("t,a,sigma,dt,dx,V,alpha,jMin,jMax");
+            return string.Format("t,a,sigma,dt,dx,V,alpha,jMin,jMax,bondPrice");
         }
         public string ToStringValues()
         {
-            return string.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}", t, a, sigma, dt, dx, V, alpha, jMin, jMax);
+            return string.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}",
+                t, a, sigma, dt, dx, V, alpha, jMin, jMax, bondPrice);
         }
     }
 }
