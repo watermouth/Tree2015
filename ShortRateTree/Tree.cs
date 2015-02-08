@@ -116,12 +116,15 @@ namespace ShortRateTree
         ///  1つの時点に対する全ノードのQ値を計算し、ツリーによる割引債価格を算出する
         /// </summary>
         /// <param name="i"></param>
+        /// <param name="priceDerivativeAlpha">ツリーによる割引債価格のalphaによる微分係数</param>
         /// <returns></returns>
-        public double ComputeBondPrice(int i)
+        public double ComputeBondPrice(int i, out double priceDerivativeAlpha)
         {
+            priceDerivativeAlpha = 0;
             if (i == 0)
             {
                 _TreeNodes[0][0].Q = 1D;
+                /// priceDerivativeAlphaは使わないのでダミー0を返す
                 return 1D;
             }
             /// i時点データ
@@ -140,6 +143,7 @@ namespace ShortRateTree
             {
                 /// down, mid, up nodeの順に集計
                 int kIndex = pNodes[j].k - bone.jMin;
+                /// BK tree
                 double temp = pNodes[j].Q * Math.Exp(-Math.Exp(pBone.alpha + pNodes[j].j * pBone.dx) * pBone.dt);
                 nodes[kIndex - 1].Q += pNodes[j].pd * temp;
                 nodes[kIndex].Q += pNodes[j].pm * temp;
@@ -149,7 +153,10 @@ namespace ShortRateTree
             double bondPrice = 0;
             for (int j = 0; j < nodeCount; ++j)
             {
-                bondPrice += nodes[j].Q;
+                double commonTerm = Math.Exp(bone.alpha * nodes[j].j * bone.dx) * bone.dt;
+                double priceTerm = nodes[j].Q * Math.Exp(-commonTerm);
+                bondPrice += priceTerm;
+                priceDerivativeAlpha -= priceTerm * commonTerm;
             }
             return bondPrice;
         }

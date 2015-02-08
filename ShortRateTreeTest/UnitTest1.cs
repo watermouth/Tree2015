@@ -38,7 +38,8 @@ namespace UnitTestProject1
             tree.OutputCsvTreeBackBones("TestMethod2B.csv");
             for (int i = 0; i < times.Length-1; ++i)
             {
-                tree.ComputeBondPrice(i);
+                double priceDerivativeAlpha;
+                tree.ComputeBondPrice(i, out priceDerivativeAlpha);
             }
             tree.OutputCsvTreeNodes("TestMethod2C.csv");
         }
@@ -58,7 +59,8 @@ namespace UnitTestProject1
             tree.SetUpTreeNodes();
             for (int i = 0; i < times.Length-1; ++i)
             {
-                tree.ComputeBondPrice(i);
+                double priceDerivativeAlpha;
+                tree.ComputeBondPrice(i, out priceDerivativeAlpha);
             }
         }
     }
