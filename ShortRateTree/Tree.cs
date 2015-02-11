@@ -28,6 +28,13 @@ namespace ShortRateTree
         {
             return _times.Length - 1;
         }
+        /// <summary>
+        /// 条件付き分散の計算
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="sigma"></param>
+        /// <param name="dt"></param>
+        /// <returns></returns>
         private double ComputeV(double a, double sigma, double dt)
         {
             return Math.Sqrt(sigma * sigma * (1 - Math.Exp(-2 * a * dt)) / (2 * a));
@@ -44,7 +51,7 @@ namespace ShortRateTree
             _TreeBackBones[0].dt = _times[1] - _times[0];
             _TreeBackBones[0].dx = 0;
             _TreeBackBones[0].V = ComputeV(a[0], sigma[0], _TreeBackBones[0].dt);
-            /// i = 1, ..., N
+            /// i = 1, ..., N - 1
             for (int i = 1; i < GetTimeSeparationNumber(); ++i)
             {
                 _TreeBackBones[i] = new TreeBackBone();
