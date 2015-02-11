@@ -115,7 +115,7 @@ namespace ShortRateTree
             }
         }
         /// <summary>
-        /// 計算済みの時点i-1ノードのQ値を用いてツリーによる割引債価格P(0,i)を算出する.
+        /// 計算済みの時点i-1ノードのQ値を用いてツリーによる割引債価格P(0,i)を算出&設定する.
         /// 引き続いて時点iに対する全ノードのQ値を計算する.
         /// </summary>
         /// <param name="i"></param>
@@ -165,6 +165,7 @@ namespace ShortRateTree
                 nodes[kIndex].Q += pNodes[j].pm * temp;
                 nodes[kIndex + 1].Q += pNodes[j].pu * temp;
             }
+            bone.bondPrice = bondPrice;
             return bondPrice;
         }
         /// <summary>
@@ -190,13 +191,13 @@ namespace ShortRateTree
             {
                 bone.alpha = Math.Log(-Math.Log(price, Math.E) / bone.dt, Math.E);
                 double dummy;
-                bone.bondPrice = ComputeBondPrice(0, out dummy);
-                _TreeBackBones[1].bondPrice = ComputeBondPrice(1, out dummy);
+                ComputeBondPrice(0, out dummy);
+                ComputeBondPrice(1, out dummy);
                 return 0D;
             }
             /// Newtow法
             /// 誤差
-            double error = 1e-10;
+            double error = 1e-15;
             /// alphaの初期値
             bone.alpha = 1D;
             /// treeにより算出する価格
