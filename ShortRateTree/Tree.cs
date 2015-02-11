@@ -224,7 +224,7 @@ namespace ShortRateTree
         /// <summary>
         /// 入力されたbondPriceに合わせるalpha[]を求め、rを設定する.
         /// </summary>
-        /// <param name="bondPrices"></param>
+        /// <param name="bondPrices">ツリーの分割時点に対する割引債価格</param>
         public void FitToInputBondPrice(double[] bondPrices){
             Debug.Assert(bondPrices.Length == _TreeBackBones.Length);
             /// alphaの算出
