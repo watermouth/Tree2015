@@ -74,6 +74,7 @@ namespace ShortRateTree
         /// <summary>
         /// ツリーノードの構築
         /// </summary>
+        /// <remarks>InitializeBackBonesを実行済みであること</remarks>
         public void SetUpTreeNodes()
         {
             /// Root Node
@@ -127,7 +128,8 @@ namespace ShortRateTree
         /// </summary>
         /// <param name="i"></param>
         /// <param name="priceDerivativeAlpha">ツリーによる割引債価格のalphaによる微分係数</param>
-        /// <returns></returns>
+        /// <returns>ツリーにより算出された割引債価格</returns>
+        /// <remarks>i=0から順に呼び出すこと</remarks>
         public double ComputeBondPrice(int i, out double priceDerivativeAlpha)
         {
             priceDerivativeAlpha = 0;
@@ -180,7 +182,7 @@ namespace ShortRateTree
         /// </summary>
         /// <param name="a"></param>
         /// <param name="x"></param>
-        /// <returns></returns>
+        /// <returns>ショートレート</returns>
         private double ConvertToShortRate(double a, double x)
         {
             return Math.Exp(a + x);
@@ -217,7 +219,6 @@ namespace ShortRateTree
                 priceByTree = ComputeBondPrice(i + 1, out derivative);
                 bone.alpha = bone.alpha - (priceByTree - price) / derivative;
             } while (Math.Abs(priceByTree - price) > error);
-            _TreeBackBones[i + 1].bondPrice = priceByTree;
             return Math.Abs(priceByTree - price);
         }
         /// <summary>
