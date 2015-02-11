@@ -114,5 +114,30 @@ namespace UnitTestProject1
             tree.FitToInputBondPrice(1, bondPrices[2]);
             Assert.AreEqual(bondPrices[2], tree._TreeBackBones[2].bondPrice);
         }
+        /// <summary>
+        /// many time steps
+        /// </summary>
+        [TestMethod]
+        public void TestFitToBondPrice()
+        {
+            int sepNum = 110;
+            double dt = 1D/64;
+            double r = 0.01;
+            double[] times = Enumerable.Range(0, sepNum+1).Select(x => x*dt).ToArray();
+            double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
+            double[] a = times.Select(x => 0.005).ToArray();
+            double[] sigma = times.Select(x => 0.5).ToArray();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            ShortRateTree.Tree tree = new Tree(times);
+            tree.InitializeBackBones(a, sigma);
+            tree.SetUpTreeNodes();
+            tree.FitToInputBondPrice(bondPrices);
+            stopWatch.Stop();
+            Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
+            tree.OutputCsvTreeBackBones("TestFitToBondPrice1A.csv");
+            tree.OutputCsvTreeNodes("TestFitToBondPrice1B.csv");
+        }
+        
     }
 }

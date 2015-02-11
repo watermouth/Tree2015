@@ -213,6 +213,27 @@ namespace ShortRateTree
             _TreeBackBones[i + 1].bondPrice = priceByTree;
             return Math.Abs(priceByTree - price);
         }
+        /// <summary>
+        /// 入力されたbondPriceに合わせるalpha[]を求め、rを設定する.
+        /// </summary>
+        /// <param name="bondPrices"></param>
+        public void FitToInputBondPrice(double[] bondPrices){
+            Debug.Assert(bondPrices.Length == _TreeBackBones.Length);
+            /// alphaの算出
+            for (int i = 0; i < _TreeBackBones.Length - 1; ++i)
+            {
+                FitToInputBondPrice(i, bondPrices[i+1]);
+            }
+            /// rの設定
+            for (int i = 0; i < bondPrices.Length - 1; ++i)
+            {
+                TreeBackBone bone = _TreeBackBones[i];
+                int jSize = bone.jMax - bone.jMin + 1;
+                for (int j=0; j<jSize; ++j){
+                    _TreeNodes[i][j].r = ConvertToShortRate(bone.alpha, _TreeNodes[i][j].j * bone.dx);
+                } 
+            }
+        }
         public void OutputCsvTreeBackBones(string filepath)
         {
             using (var sw = new System.IO.StreamWriter(filepath, false))
