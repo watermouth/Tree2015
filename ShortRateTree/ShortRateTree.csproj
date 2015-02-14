@@ -42,8 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cashflow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimpleBermudanSwaption.cs" />
+    <Compile Include="TimeInterval.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="TreeBackBone.cs" />
     <Compile Include="TreeNode.cs" />
