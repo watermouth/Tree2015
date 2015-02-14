@@ -29,7 +29,16 @@ namespace ShortRateTree
         /// </summary>
         public bool IsDiscountBondPriceMaturity;
 
-        public void DivideTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays)
+        /// <summary>
+        /// 2つの日付間を分割する。分割できればtrueを返す。
+        /// 実質的に分割されていないとき(=leftDate, rightDateのみの時点からなるTreeTimes)はfalseを返す.
+        /// </summary>
+        /// <param name="baseDate"></param>
+        /// <param name="leftDate"></param>
+        /// <param name="rightDate"></param>
+        /// <param name="divideIntervalDays"></param>
+        /// <returns></returns>
+        public bool DivideTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays)
         {
             Debug.Assert(DateTime.Compare(leftDate, rightDate) < 0);
             int d = (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero);
@@ -38,6 +47,7 @@ namespace ShortRateTree
             {
                 TreeTimes[i] = (leftDate.AddDays(i * divideIntervalDays) - baseDate).TotalDays / 365D;
             }
+            return d > 0;
         }
 
         //public static 
