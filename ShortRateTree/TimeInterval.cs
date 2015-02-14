@@ -29,14 +29,14 @@ namespace ShortRateTree
         /// </summary>
         public bool IsDiscountBondPriceMaturity;
 
-        public void DivideTimeInterval(DateTime baseDate, DateTime resetDate, DateTime settleDate, double divideIntervalDays)
+        public void DivideTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays)
         {
-            Debug.Assert(DateTime.Compare(resetDate, settleDate) < 0);
-            int d = (int)Math.Round((settleDate - resetDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero);
+            Debug.Assert(DateTime.Compare(leftDate, rightDate) < 0);
+            int d = (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero);
             TreeTimes = new double[d+1];
             for (int i = 0; i <= d; ++i)
             {
-                TreeTimes[i] = (resetDate.AddDays(i * divideIntervalDays) - baseDate).TotalDays / 365D;
+                TreeTimes[i] = (leftDate.AddDays(i * divideIntervalDays) - baseDate).TotalDays / 365D;
             }
         }
     }
