@@ -16,6 +16,8 @@ namespace ShortRateTreeTest
             TimeInterval t = new TimeInterval();
             t.DivideTimeInterval(baseDate, resetDate, settleDate, 6 * 30);
             Console.WriteLine(t.ToStringValues());
+            Assert.IsTrue(t.DivideTimeInterval(baseDate, resetDate, settleDate, 1));
+            Assert.IsTrue(!t.DivideTimeInterval(baseDate, resetDate, resetDate, 1));
         }
     }
 }

@@ -40,7 +40,7 @@ namespace ShortRateTree
         /// <returns></returns>
         public bool DivideTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays)
         {
-            Debug.Assert(DateTime.Compare(leftDate, rightDate) < 0);
+            Debug.Assert(DateTime.Compare(leftDate, rightDate) <= 0);
             if (DateTime.Compare(leftDate, rightDate) == 0) return false;
             int d = (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero);
             TreeTimes = new double[d + 1];
