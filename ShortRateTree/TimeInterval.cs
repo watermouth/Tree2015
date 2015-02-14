@@ -33,11 +33,20 @@ namespace ShortRateTree
         {
             Debug.Assert(DateTime.Compare(leftDate, rightDate) < 0);
             int d = (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero);
-            TreeTimes = new double[d+1];
+            TreeTimes = new double[d + 1];
             for (int i = 0; i <= d; ++i)
             {
                 TreeTimes[i] = (leftDate.AddDays(i * divideIntervalDays) - baseDate).TotalDays / 365D;
             }
+        }
+
+        //public static 
+        public string ToStringValues()
+        {
+            string[] s = TreeTimes.Select(x => string.Format("{0}", x)).ToArray();
+            return string.Format("{0},{1},{2},{3}",
+                MaxTreeTimeIndex, IsExerciseDate, IsDiscountBondPriceMaturity, string.Join("_", s) 
+                );
         }
     }
 }
