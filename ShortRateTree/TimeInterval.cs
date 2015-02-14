@@ -31,7 +31,7 @@ namespace ShortRateTree
 
         /// <summary>
         /// 2つの日付間を分割する。分割できればtrueを返す。
-        /// 実質的に分割されていないとき(=leftDate, rightDateのみの時点からなるTreeTimes)はfalseを返す.
+        /// 分割されないとき(leftDate == rightDate)はfalseを返す.
         /// </summary>
         /// <param name="baseDate"></param>
         /// <param name="leftDate"></param>
@@ -41,6 +41,7 @@ namespace ShortRateTree
         public bool DivideTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays)
         {
             Debug.Assert(DateTime.Compare(leftDate, rightDate) < 0);
+            if (DateTime.Compare(leftDate, rightDate) == 0) return false;
             int d = (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero);
             TreeTimes = new double[d + 1];
             for (int i = 0; i <= d; ++i)
