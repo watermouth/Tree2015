@@ -72,6 +72,7 @@ namespace ShortRateTree
                 }
                 /// [cashflowIndexのリセット時点, i番目の権利行使時点]
                 /// このTimeIntervalの左端を満期とする債券価格を考える
+                tval = new TimeInterval();
                 tval.SetTimeInterval(baseDate, cf.ResetDate, exerciseDates[i], divideIntervalDays[i]
                     , true, true, ref treeTimeIndex);
                 timeIntervals.Add(tval);
@@ -93,6 +94,7 @@ namespace ShortRateTree
                 tval = new TimeInterval();
                 tval.SetTimeInterval(baseDate, cashflows[cashflowIndex].ResetDate, cashflows[cashflowIndex].SettlementDate
                     , divideIntervalDays[cashflowIndex], true, false, ref treeTimeIndex);
+                timeIntervals.Add(tval);
                 cashflowIndex++;
             }
         }
@@ -112,7 +114,7 @@ namespace ShortRateTree
             using (var sw = new System.IO.StreamWriter(filepath, false))
             {
                 sw.WriteLine(TimeInterval.ToStringValuesHeader());
-                for (int i = 0; i < _cashflows.Length; ++i)
+                for (int i = 0; i < timeIntervals.Count; ++i)
                 {
                     sw.WriteLine(timeIntervals[i].ToStringValues());
                 }

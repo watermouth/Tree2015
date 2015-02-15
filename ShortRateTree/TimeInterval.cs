@@ -49,19 +49,18 @@ namespace ShortRateTree
                 TreeTimes = new double[1];
                 return false;
             }
-            /// 分割なし(2より小さい)なら2つ、ありなら3つ以上
-            int d = Math.Max(
-                (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero)
-                , 2);
-            TreeTimes = new double[d];
-            TreeDates = new DateTime[d];
-            for (int i = 0; i < d - 1; ++i)
+            /// 分割
+            int d = (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero);
+            d = d == 0 ? 1 : d;
+            TreeTimes = new double[d+1];
+            TreeDates = new DateTime[d+1];
+            for (int i = 0; i < d; ++i)
             {
                 TreeDates[i] = leftDate.AddDays(i * divideIntervalDays);
                 TreeTimes[i] = (TreeDates[i] - baseDate).TotalDays / 365D;
             }
-            TreeDates[d - 1] = rightDate;
-            TreeTimes[d - 1] = (rightDate - baseDate).TotalDays / 365D;
+            TreeDates[d] = rightDate;
+            TreeTimes[d] = (rightDate - baseDate).TotalDays / 365D;
             return d > 0;
         }
         public void SetTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays

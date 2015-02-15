@@ -17,7 +17,7 @@ namespace ShortRateTreeTest
             int exerciseCount = 2;
             int resetCount = 4;
             double swapRate = 0.01;
-            double divideInterval = 90;
+            double divideInterval = 60;
             Debug.Assert(resetCount >= exerciseCount);
             DateTime[] exerciseDates = Enumerable.Range(1, exerciseCount).Select(x => baseDate.AddMonths(x * 6)).ToArray();
             DateTime[] resetDates = Enumerable.Range(1, resetCount + 1).Select(x => baseDate.AddMonths(x * 6).AddDays(2)).ToArray();
