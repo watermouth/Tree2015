@@ -16,6 +16,7 @@ namespace ShortRateTree
         /// この区間内のツリー分割時点
         /// </summary>
         public double[] TreeTimes;
+        public DateTime[] TreeDates;///Debug用
         /// <summary>
         /// この区間の最大時点に対するツリー時点のindex
         /// </summary>
@@ -42,13 +43,25 @@ namespace ShortRateTree
         {
             Debug.Assert(DateTime.Compare(baseDate, leftDate) <= 0, "基準日はleftDate以前でなければならない");
             Debug.Assert(DateTime.Compare(leftDate, rightDate) <= 0, "leftDate <= rightDateでなければならない");
-            if (DateTime.Compare(leftDate, rightDate) == 0) return false;
-            int d = (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero);
-            TreeTimes = new double[d + 1];
-            for (int i = 0; i <= d; ++i)
+            if (DateTime.Compare(leftDate, rightDate) == 0)
             {
-                TreeTimes[i] = (leftDate.AddDays(i * divideIntervalDays) - baseDate).TotalDays / 365D;
+                /// 分割なし
+                TreeTimes = new double[1];
+                return false;
             }
+            /// 分割なし(2より小さい)なら2つ、ありなら3つ以上
+            int d = Math.Max(
+                (int)Math.Round((rightDate - leftDate).TotalDays / divideIntervalDays, MidpointRounding.AwayFromZero)
+                , 2);
+            TreeTimes = new double[d];
+            TreeDates = new DateTime[d];
+            for (int i = 0; i < d - 1; ++i)
+            {
+                TreeDates[i] = leftDate.AddDays(i * divideIntervalDays);
+                TreeTimes[i] = (TreeDates[i] - baseDate).TotalDays / 365D;
+            }
+            TreeDates[d - 1] = rightDate;
+            TreeTimes[d - 1] = (rightDate - baseDate).TotalDays / 365D;
             return d > 0;
         }
 
@@ -56,8 +69,10 @@ namespace ShortRateTree
         public string ToStringValues()
         {
             string[] s = TreeTimes.Select(x => string.Format("{0}", x)).ToArray();
-            return string.Format("{0},{1},{2},{3}",
-                MaxTreeTimeIndex, IsExerciseDate, IsDiscountBondPriceMaturity, string.Join("_", s) 
+            string[] sd = TreeDates.Select(x => string.Format("{0}", x)).ToArray();
+            return string.Format("{0},{1},{2},{3},{4}",
+                MaxTreeTimeIndex, IsExerciseDate, IsDiscountBondPriceMaturity, string.Join("_", s),
+                string.Join("_", sd)
                 );
         }
     }
