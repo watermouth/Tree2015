@@ -74,14 +74,17 @@ namespace ShortRateTree
             leftTreeTimeIndex = MaxTreeTimeIndex;
         }
 
-        //public static 
+        public static string ToStringValuesHeader()
+        {
+            return string.Format("MaxTreeTimeIndex,IsDiscountBondPriceMaturity,IsExerciseDate,separation");
+        } 
         public string ToStringValues()
         {
             string[] s = TreeTimes.Select(x => string.Format("{0}", x)).ToArray();
             string[] sd = TreeDates.Select(x => string.Format("{0}", x)).ToArray();
-            return string.Format("{0},{1},{2},{3},{4}",
-                MaxTreeTimeIndex, IsExerciseDate, IsDiscountBondPriceMaturity, string.Join("_", s),
-                string.Join("_", sd)
+            return string.Format("{0},{1},{2},{3}",
+                MaxTreeTimeIndex, IsDiscountBondPriceMaturity, IsExerciseDate
+                , string.Join("|", string.Join("_", s), string.Join("_", sd))
                 );
         }
     }

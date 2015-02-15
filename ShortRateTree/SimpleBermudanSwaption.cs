@@ -10,18 +10,22 @@ namespace ShortRateTree
     public class SimpleBermudanSwaption
     {
         //Tree tree;
-        List<TimeInterval> timeIntervals;
-        public void DivideTimeIntervals(DateTime baseDate, DateTime[] exerciseDates, Cashflow[] cashflows, int[] divideIntervalDays)
+        Cashflow[] _cashflows;
+        public List<TimeInterval> timeIntervals;
+        public void DivideTimeIntervals(DateTime baseDate, DateTime[] exerciseDates, Cashflow[] cashflows
+            , double[] divideIntervalDays)
         {
             Debug.Assert(cashflows.Length <= divideIntervalDays.Length);
             Debug.Assert(exerciseDates.Length > 0);
             Debug.Assert(DateTime.Compare(baseDate, exerciseDates[0]) <= 0);
+            _cashflows = cashflows;
             timeIntervals = new List<TimeInterval>();
             int treeTimeIndex = 0;
             /// 初回の扱い
             TimeInterval tval = new TimeInterval();
             tval.SetTimeInterval(baseDate, baseDate, exerciseDates[0], (double)divideIntervalDays[0],
                 false, true, ref treeTimeIndex);
+            timeIntervals.Add(tval);
             /// cashflow index
             int cashflowIndex = 0;
             /// 2つめの権利行使時点から最後の権利行使時点まで。 
@@ -33,7 +37,8 @@ namespace ShortRateTree
                 /// 次の権利行使時点が直近のcf.ResetDateよりも手前かどうかで分ける;
                 /// 複数の権利行使時点があるとき
                 /// [i-1番目の権利行使時点, i番目の権利行使時点]
-                if (DateTime.Compare(exerciseDates[i], cf.ResetDate) >= 0)
+                /// 権利行使日 = リセット日となるケースを含めることに注意
+                if (DateTime.Compare(exerciseDates[i], cf.ResetDate) <= 0)
                 {
                     tval = new TimeInterval();
                     ///このTimeIntervalの右端が権利行使時点
@@ -89,6 +94,28 @@ namespace ShortRateTree
                 tval.SetTimeInterval(baseDate, cashflows[cashflowIndex].ResetDate, cashflows[cashflowIndex].SettlementDate
                     , divideIntervalDays[cashflowIndex], true, false, ref treeTimeIndex);
                 cashflowIndex++;
+            }
+        }
+        public void OutputCsvCashflows(string filepath)
+        {
+            using (var sw = new System.IO.StreamWriter(filepath, false))
+            {
+                sw.WriteLine(Cashflow.ToStringValuesHeader());
+                for (int i = 0; i < _cashflows.Length; ++i)
+                {
+                    sw.WriteLine(_cashflows[i].ToStringValues());
+                }
+            }
+        }
+        public void OutputCsvTimeIntervals(string filepath)
+        {
+            using (var sw = new System.IO.StreamWriter(filepath, false))
+            {
+                sw.WriteLine(TimeInterval.ToStringValuesHeader());
+                for (int i = 0; i < _cashflows.Length; ++i)
+                {
+                    sw.WriteLine(timeIntervals[i].ToStringValues());
+                }
             }
         }
     }
