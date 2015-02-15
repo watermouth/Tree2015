@@ -64,6 +64,15 @@ namespace ShortRateTree
             TreeTimes[d - 1] = (rightDate - baseDate).TotalDays / 365D;
             return d > 0;
         }
+        public void SetTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays
+            , bool isLeftDiscountBondPriceMaturity, bool isRightExerciseDate, ref int leftTreeTimeIndex)
+        {
+            DivideTimeInterval(baseDate, leftDate, rightDate, divideIntervalDays);
+            IsDiscountBondPriceMaturity = isLeftDiscountBondPriceMaturity;
+            IsExerciseDate = isRightExerciseDate;
+            MaxTreeTimeIndex = leftTreeTimeIndex + TreeTimes.Length - 1;
+            leftTreeTimeIndex = MaxTreeTimeIndex;
+        }
 
         //public static 
         public string ToStringValues()
