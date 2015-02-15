@@ -12,6 +12,7 @@ namespace ShortRateTree
         //Tree tree;
         Cashflow[] _cashflows;
         public List<TimeInterval> timeIntervals;
+        public DateTime[] _exerciseDates;
         public void DivideTimeIntervals(DateTime baseDate, DateTime[] exerciseDates, Cashflow[] cashflows
             , double[] divideIntervalDays)
         {
@@ -19,6 +20,7 @@ namespace ShortRateTree
             Debug.Assert(exerciseDates.Length > 0);
             Debug.Assert(DateTime.Compare(baseDate, exerciseDates[0]) <= 0);
             _cashflows = cashflows;
+            _exerciseDates = exerciseDates;
             timeIntervals = new List<TimeInterval>();
             int treeTimeIndex = 0;
             /// 初回の扱い
@@ -96,6 +98,17 @@ namespace ShortRateTree
                     , divideIntervalDays[cashflowIndex], true, false, ref treeTimeIndex);
                 timeIntervals.Add(tval);
                 cashflowIndex++;
+            }
+        }
+        public void OutputCsvExerciseDates(string filepath)
+        {
+            using (var sw = new System.IO.StreamWriter(filepath, false))
+            {
+                sw.WriteLine("ExerciseDate");
+                for (int i = 0; i < _exerciseDates.Length; ++i)
+                {
+                    sw.WriteLine(_exerciseDates[i]);
+                }
             }
         }
         public void OutputCsvCashflows(string filepath)
