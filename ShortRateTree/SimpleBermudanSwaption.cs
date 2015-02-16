@@ -13,6 +13,7 @@ namespace ShortRateTree
         Cashflow[] _cashflows;
         public List<TimeInterval> timeIntervals;
         public DateTime[] _exerciseDates;
+        public Tree _Tree;
         public void DivideTimeIntervals(DateTime baseDate, DateTime[] exerciseDates, Cashflow[] cashflows
             , double[] divideIntervalDays)
         {
@@ -92,6 +93,46 @@ namespace ShortRateTree
                     , divideIntervalDays[cashflowIndex], true, false, ref treeTimeIndex)) timeIntervals.Add(tval);
                 cashflowIndex++;
             }
+        }
+        /// <summary>
+        /// 分割したTimeIntervalを用いて、ツリーの分割時点を設定・取得する。
+        /// </summary>
+        public void SetTreeTimes()
+        {
+            List<double> treeTimeList = new List<double>();
+            foreach(TimeInterval l in timeIntervals)
+            {
+                /// 右端を除いて時点を取得
+                for(int i=0; i<l.TreeTimes.Length-1;++i)
+                {
+                    treeTimeList.Add(l.TreeTimes[i]);
+                }
+            }
+            /// 最後のTimeIntervalの右端の時点を取得
+            treeTimeList.Add(timeIntervals.Last().TreeTimes.Last());
+            _Tree = new Tree(treeTimeList.ToArray());
+        }
+        public double[] GetTreeTimes(){
+            if(null == _Tree) SetTreeTimes();
+            return (double[])_Tree._times.Clone();
+        }
+        /// <summary>
+        /// ツリーの時点にあわせたa, sigmaを入力し、ツリーを初期化する
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="sigma"></param>
+        public void InitializeTree(double[] a, double[] sigma)
+        {
+            _Tree.InitializeBackBones(a, sigma);
+            _Tree.SetUpTreeNodes();
+        }
+        /// <summary>
+        /// 割引債価格にツリーを合わせる. 事前条件：InitializeTree実行済みであること。
+        /// </summary>
+        /// <param name="bondPrices"></param>
+        public void FitToBondPrices(double[] bondPrices)
+        {
+            _Tree.FitToInputBondPrice(bondPrices);
         }
         public void OutputCsvExerciseDates(string filepath)
         {

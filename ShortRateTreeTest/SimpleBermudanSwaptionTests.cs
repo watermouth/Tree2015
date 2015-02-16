@@ -35,6 +35,15 @@ namespace ShortRateTreeTest
             sbs.OutputCsvExerciseDates("BermudanSwaptionExerciseDates.csv");
             sbs.OutputCsvCashflows("BermudanSwaptionCashflows.csv");
             sbs.OutputCsvTimeIntervals("BermudanSwaptionTimeIntervals.csv");
+            sbs.SetTreeTimes();
+            double r = 0.01;
+            double[] times = sbs.GetTreeTimes();
+            double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
+            double[] a = times.Select(x => 0.005).ToArray();
+            double[] sigma = times.Select(x => 0.5).ToArray();
+            sbs.InitializeTree(a, sigma);
+            sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
+            sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
         }
         /// <summary>
         /// 複数の権利行使日が1つのリセット日に対してあるもの 
@@ -61,6 +70,15 @@ namespace ShortRateTreeTest
             sbs.OutputCsvExerciseDates("BermudanSwaptionExerciseDates.csv");
             sbs.OutputCsvCashflows("BermudanSwaptionCashflows.csv");
             sbs.OutputCsvTimeIntervals("BermudanSwaptionTimeIntervals.csv");
+            sbs.SetTreeTimes();
+            double r = 0.01;
+            double[] times = sbs.GetTreeTimes();
+            double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
+            double[] a = times.Select(x => 0.005).ToArray();
+            double[] sigma = times.Select(x => 0.5).ToArray();
+            sbs.InitializeTree(a, sigma);
+            sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
+            sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
         }
         /// <summary>
         /// 権利行使日とリセット日が一致するもの 
@@ -87,6 +105,15 @@ namespace ShortRateTreeTest
             sbs.OutputCsvExerciseDates("BermudanSwaptionExerciseDates.csv");
             sbs.OutputCsvCashflows("BermudanSwaptionCashflows.csv");
             sbs.OutputCsvTimeIntervals("BermudanSwaptionTimeIntervals.csv");
+            sbs.SetTreeTimes();
+            double r = 0.01;
+            double[] times = sbs.GetTreeTimes();
+            double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
+            double[] a = times.Select(x => 0.005).ToArray();
+            double[] sigma = times.Select(x => 0.5).ToArray();
+            sbs.InitializeTree(a, sigma);
+            sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
+            sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
         }
     }
 }

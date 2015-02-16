@@ -8,7 +8,7 @@ namespace ShortRateTree
 {
     public class Tree
     {
-        private double[] _times;
+        public double[] _times;
         public TreeBackBone[] _TreeBackBones;
         public TreeNode[][] _TreeNodes;
 
