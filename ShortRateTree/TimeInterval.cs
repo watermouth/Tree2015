@@ -47,6 +47,7 @@ namespace ShortRateTree
             {
                 /// 分割なし
                 TreeTimes = new double[1];
+                TreeDates = new DateTime[1];
                 return false;
             }
             /// 分割
@@ -63,14 +64,29 @@ namespace ShortRateTree
             TreeTimes[d] = (rightDate - baseDate).TotalDays / 365D;
             return d > 0;
         }
-        public void SetTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays
+        /// <summary>
+        /// 分割後の区間を取得
+        /// </summary>
+        /// <param name="baseDate"></param>
+        /// <param name="leftDate"></param>
+        /// <param name="rightDate"></param>
+        /// <param name="divideIntervalDays"></param>
+        /// <param name="isLeftDiscountBondPriceMaturity"></param>
+        /// <param name="isRightExerciseDate"></param>
+        /// <param name="leftTreeTimeIndex"></param>
+        public bool SetTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays
             , bool isLeftDiscountBondPriceMaturity, bool isRightExerciseDate, ref int leftTreeTimeIndex)
         {
-            DivideTimeInterval(baseDate, leftDate, rightDate, divideIntervalDays);
+            /// 分割できないときはfalse
+            if (!DivideTimeInterval(baseDate, leftDate, rightDate, divideIntervalDays))
+            {
+                return false;
+            };
             IsDiscountBondPriceMaturity = isLeftDiscountBondPriceMaturity;
             IsExerciseDate = isRightExerciseDate;
             MaxTreeTimeIndex = leftTreeTimeIndex + TreeTimes.Length - 1;
             leftTreeTimeIndex = MaxTreeTimeIndex;
+            return true;
         }
 
         public static string ToStringValuesHeader()
