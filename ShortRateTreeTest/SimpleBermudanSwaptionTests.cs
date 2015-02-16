@@ -17,8 +17,8 @@ namespace ShortRateTreeTest
         public void TestMethod1()
         {
             DateTime baseDate = new DateTime(2015, 2, 1);
-            int exerciseCount = 2;
-            int resetCount = 4;
+            int exerciseCount = 20;
+            int resetCount = 40;
             double swapRate = 0.01;
             double divideInterval = 90;
             Debug.Assert(resetCount >= exerciseCount);
@@ -41,7 +41,12 @@ namespace ShortRateTreeTest
             double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
             double[] a = times.Select(x => 0.005).ToArray();
             double[] sigma = times.Select(x => 0.5).ToArray();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             sbs.InitializeTree(a, sigma);
+            sbs.FitToBondPrices(bondPrices);
+            stopWatch.Stop();
+            Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
             sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
         }
@@ -76,7 +81,12 @@ namespace ShortRateTreeTest
             double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
             double[] a = times.Select(x => 0.005).ToArray();
             double[] sigma = times.Select(x => 0.5).ToArray();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             sbs.InitializeTree(a, sigma);
+            sbs.FitToBondPrices(bondPrices);
+            stopWatch.Stop();
+            Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
             sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
         }
@@ -87,10 +97,10 @@ namespace ShortRateTreeTest
         public void TestMethod3()
         {
             DateTime baseDate = new DateTime(2015, 2, 1);
-            int exerciseCount = 2;
-            int resetCount = 4;
+            int exerciseCount = 20;
+            int resetCount = 40;
             double swapRate = 0.01;
-            double divideInterval = 90;
+            double divideInterval = 30;
             Debug.Assert(resetCount >= exerciseCount);
             DateTime[] exerciseDates = Enumerable.Range(1, exerciseCount).Select(x => baseDate.AddMonths(x * 6)).ToArray();
             DateTime[] resetDates = Enumerable.Range(1, resetCount + 1).Select(x => baseDate.AddMonths(x * 6)).ToArray();
@@ -111,7 +121,12 @@ namespace ShortRateTreeTest
             double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
             double[] a = times.Select(x => 0.005).ToArray();
             double[] sigma = times.Select(x => 0.5).ToArray();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             sbs.InitializeTree(a, sigma);
+            sbs.FitToBondPrices(bondPrices);
+            stopWatch.Stop();
+            Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
             sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
         }
