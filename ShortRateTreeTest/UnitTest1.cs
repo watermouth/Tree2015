@@ -18,7 +18,7 @@ namespace UnitTestProject1
             int sepNum = 10;
             double dt = 0.1;
             double r = 0.01;
-            double[] times = Enumerable.Range(0, sepNum).Select(x => x*dt).ToArray();
+            double[] times = Enumerable.Range(0, sepNum).Select(x => x * dt).ToArray();
             double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
             double[] a = times.Select(x => 0.005).ToArray();
             double[] sigma = times.Select(x => 0.5).ToArray();
@@ -27,9 +27,9 @@ namespace UnitTestProject1
             tree.OutputCsvTreeBackBones("TestMethod1A.csv");
             tree.SetUpTreeNodes();
             tree.OutputCsvTreeNodes("TestMethod1B.csv");
-            for (int i = 0; i < times.Length-1; ++i)
+            for (int i = 0; i < times.Length - 1; ++i)
             {
-                tree.FitToInputBondPrice(i, bondPrices[i+1]);
+                tree.FitToInputBondPrice(i, bondPrices[i + 1]);
             }
             tree.OutputCsvTreeBackBones("TestMethod1C.csv");
             tree.OutputCsvTreeNodes("TestMethod1D.csv");
@@ -40,7 +40,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod2()
         {
-            double[] times = { 0, 0.01, 0.1, 0.11, 0.2, 1.0, 10.0, 10.1, 11.0, 20.0, 100, 101};
+            double[] times = { 0, 0.01, 0.1, 0.11, 0.2, 1.0, 10.0, 10.1, 11.0, 20.0, 100, 101 };
             double r = 0.01;
             double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
             double[] a = times.Select(x => 0.005).ToArray();
@@ -50,9 +50,9 @@ namespace UnitTestProject1
             tree.OutputCsvTreeBackBones("TestMethod2A.csv");
             tree.SetUpTreeNodes();
             tree.OutputCsvTreeBackBones("TestMethod2B.csv");
-            for (int i = 0; i < times.Length-1; ++i)
+            for (int i = 0; i < times.Length - 1; ++i)
             {
-                tree.FitToInputBondPrice(i, bondPrices[i+1]);
+                tree.FitToInputBondPrice(i, bondPrices[i + 1]);
             }
             tree.OutputCsvTreeBackBones("TestMethod2C.csv");
             tree.OutputCsvTreeNodes("TestMethod2D.csv");
@@ -64,27 +64,30 @@ namespace UnitTestProject1
         public void TestMethod3()
         {
             int sepNum = 1100;
-            double dt = 1D/64;
+            double dt = 1D / 64;
             double r = 0.01;
-            double[] times = Enumerable.Range(0, sepNum+1).Select(x => x*dt).ToArray();
+            double[] times = Enumerable.Range(0, sepNum + 1).Select(x => x * dt).ToArray();
             double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
             double[] a = times.Select(x => 0.005).ToArray();
             double[] sigma = times.Select(x => 0.5).ToArray();
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             ShortRateTree.Tree tree = new Tree(times);
-            tree.InitializeBackBones(a, sigma);
-            tree.SetUpTreeNodes();
-            for (int i = 0; i < times.Length-1; ++i)
+            for (int count = 0; count < 10; ++count)
             {
-                tree.FitToInputBondPrice(i, bondPrices[i+1]);
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                tree.InitializeBackBones(a, sigma);
+                tree.SetUpTreeNodes();
+                for (int i = 0; i < times.Length - 1; ++i)
+                {
+                    tree.FitToInputBondPrice(i, bondPrices[i + 1]);
+                }
+                stopWatch.Stop();
+                Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             }
-            stopWatch.Stop();
-            Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             tree.OutputCsvTreeBackBones("TestMethod3C.csv");
             tree.OutputCsvTreeNodes("TestMethod3D.csv");
         }
-        
+
         [TestMethod]
         public void TestComputeBondPrice1()
         {
@@ -121,23 +124,26 @@ namespace UnitTestProject1
         public void TestFitToBondPrice()
         {
             int sepNum = 110;
-            double dt = 1D/64;
+            double dt = 1D / 64;
             double r = 0.01;
-            double[] times = Enumerable.Range(0, sepNum+1).Select(x => x*dt).ToArray();
+            double[] times = Enumerable.Range(0, sepNum + 1).Select(x => x * dt).ToArray();
             double[] bondPrices = times.Select(x => Math.Exp(-r * x)).ToArray();
             double[] a = times.Select(x => 0.005).ToArray();
             double[] sigma = times.Select(x => 0.5).ToArray();
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             ShortRateTree.Tree tree = new Tree(times);
-            tree.InitializeBackBones(a, sigma);
-            tree.SetUpTreeNodes();
-            tree.FitToInputBondPrice(bondPrices);
-            stopWatch.Stop();
-            Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
+            for (int count = 0; count < 10; ++count)
+            {
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                tree.InitializeBackBones(a, sigma);
+                tree.SetUpTreeNodes();
+                tree.FitToInputBondPrice(bondPrices);
+                stopWatch.Stop();
+                Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
+            }
             tree.OutputCsvTreeBackBones("TestFitToBondPrice1A.csv");
             tree.OutputCsvTreeNodes("TestFitToBondPrice1B.csv");
         }
-        
+
     }
 }
