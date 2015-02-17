@@ -134,6 +134,30 @@ namespace ShortRateTree
         {
             _Tree.FitToInputBondPrice(bondPrices);
         }
+        public void ComputePV(bool IsPayersSwaption)
+        {
+            TimeInterval[] tvals = timeIntervals.ToArray();
+            /// Backward Induction
+            /// ツリーの最終時点を満期とする割引債価格の初期化
+            for (int l = tvals.Length - 1; l >= 0; --l)
+            {
+                TimeInterval tval = tvals[l];
+                /// Exercise Check
+                if (tval.IsExerciseDate)
+                {
+                    /// Fixed Leg
+                    /// Float Leg
+                    /// IRS Value
+                    /// CC Value
+                }
+                /// discounting
+                for (int i = tval.MaxTreeTimeIndex - 1; i >= tval.MinTreeTimeIndex; --i)
+                {
+
+                } 
+                /// New Bond Maturity Check
+            }
+        }
         public void OutputCsvExerciseDates(string filepath)
         {
             using (var sw = new System.IO.StreamWriter(filepath, false))
