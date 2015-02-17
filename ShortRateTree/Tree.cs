@@ -193,7 +193,7 @@ namespace ShortRateTree
         /// <param name="i"></param>
         /// <param name="price"></param>
         /// <returns>収束誤差</returns>
-        public double FitToInputBondPrice(int i, double price)
+        public double FitToInputBondPrice(int i, double price, double initialAlpha = 0D)
         {
             TreeBackBone bone = _TreeBackBones[i];
             if (i == 0)
@@ -208,7 +208,7 @@ namespace ShortRateTree
             /// 誤差
             double error = 1e-15;
             /// alphaの初期値
-            bone.alpha = 1D;
+            bone.alpha = initialAlpha;
             /// treeにより算出する価格
             double priceByTree;
             do
@@ -228,9 +228,15 @@ namespace ShortRateTree
         public void FitToInputBondPrice(double[] bondPrices){
             Debug.Assert(bondPrices.Length == _TreeBackBones.Length);
             /// alphaの算出
+            double initialAlpha = 0D;
             for (int i = 0; i < _TreeBackBones.Length - 1; ++i)
             {
-                FitToInputBondPrice(i, bondPrices[i+1]);
+                FitToInputBondPrice(i, bondPrices[i+1], initialAlpha);
+                if (_TreeBackBones[i].alpha == Double.NegativeInfinity)
+                {
+                    initialAlpha = 0D;
+                }
+                initialAlpha = _TreeBackBones[i].alpha;
             }
             /// rの設定
             for (int i = 0; i < bondPrices.Length - 1; ++i)
