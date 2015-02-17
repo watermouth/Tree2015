@@ -199,8 +199,10 @@ namespace ShortRateTree
                         /// Fixed Leg, Act/365
                         columnNodes[j].FixedLegValue += columnNodes[j].DiscountBondPrice * tval.cashflow.SwapRate * days / 365D;
                         /// Float Leg, Act/360
-                        double IBOR = (1 - columnNodes[j].DiscountBondPrice) / columnNodes[j].DiscountBondPrice;
-                        columnNodes[j].FloatLegValue += columnNodes[j].DiscountBondPrice * IBOR * days / 360D;
+                        /// マルチカーブを意識したこの書き方にすると、長時間後のショートレート発散時にNaNになってしまう。
+                        //double IBOR = (1 - columnNodes[j].DiscountBondPrice) / columnNodes[j].DiscountBondPrice;
+                        //columnNodes[j].FloatLegValue += columnNodes[j].DiscountBondPrice * IBOR * days / 360D;
+                        columnNodes[j].FloatLegValue += (1 - columnNodes[j].DiscountBondPrice) * days / 360D;
                         /// 新たな満期の割引債価格として初期化
                         columnNodes[j].DiscountBondPrice = 1D;
                     }

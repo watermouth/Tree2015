@@ -98,9 +98,9 @@ namespace ShortRateTreeTest
         {
             DateTime baseDate = new DateTime(2015, 2, 1);
             int exerciseCount = 20;
-            int resetCount = 40;
+            int resetCount = 20;
             double swapRate = 0.01;
-            double divideInterval = 30;
+            double divideInterval = 6;
             Debug.Assert(resetCount >= exerciseCount);
             DateTime[] exerciseDates = Enumerable.Range(1, exerciseCount).Select(x => baseDate.AddMonths(x * 6)).ToArray();
             DateTime[] resetDates = Enumerable.Range(1, resetCount + 1).Select(x => baseDate.AddMonths(x * 6)).ToArray();
@@ -129,6 +129,8 @@ namespace ShortRateTreeTest
             Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
             sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
+
+            Console.WriteLine("PV={0}", sbs.ComputePV(true));
         }
     }
 }
