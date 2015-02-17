@@ -22,6 +22,10 @@ namespace ShortRateTree
         /// </summary>
         public int MaxTreeTimeIndex;
         /// <summary>
+        /// この区間の最小時点に対するツリー時点のindex
+        /// </summary>
+        public int MinTreeTimeIndex;
+        /// <summary>
         /// この区間の右端の時点が、権利行使時点か 
         /// </summary>
         public bool IsExerciseDate;
@@ -84,6 +88,7 @@ namespace ShortRateTree
             };
             IsDiscountBondPriceMaturity = isLeftDiscountBondPriceMaturity;
             IsExerciseDate = isRightExerciseDate;
+            MinTreeTimeIndex = leftTreeTimeIndex;
             MaxTreeTimeIndex = leftTreeTimeIndex + TreeTimes.Length - 1;
             leftTreeTimeIndex = MaxTreeTimeIndex;
             return true;
