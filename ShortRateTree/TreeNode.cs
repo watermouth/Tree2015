@@ -18,6 +18,10 @@ namespace ShortRateTree
         public double pd;
         public double Q;
         public double r;
+        public double DiscountBondPrice;
+        public double FixedLegValue;
+        public double FloatLegValue;
+        public double ContingentClaimValue;
 
         /// <summary>
         /// 初期化 : 遷移に関する量を設定する

@@ -33,7 +33,10 @@ namespace ShortRateTree
         /// この区間の左端の時点が、割引債の満期時点であるか 
         /// </summary>
         public bool IsDiscountBondPriceMaturity;
-
+        /// <summary>
+        /// この区間に属すCashflow
+        /// </summary>
+        public Cashflow cashflow;
         /// <summary>
         /// 2つの日付間を分割する。分割できればtrueを返す。
         /// 分割されないとき(leftDate == rightDate)はfalseを返す.
@@ -79,7 +82,8 @@ namespace ShortRateTree
         /// <param name="isRightExerciseDate"></param>
         /// <param name="leftTreeTimeIndex"></param>
         public bool SetTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays
-            , bool isLeftDiscountBondPriceMaturity, bool isRightExerciseDate, ref int leftTreeTimeIndex)
+            , bool isLeftDiscountBondPriceMaturity, bool isRightExerciseDate
+            , Cashflow cashflow, ref int leftTreeTimeIndex)
         {
             /// 分割できないときはfalse
             if (!DivideTimeInterval(baseDate, leftDate, rightDate, divideIntervalDays))
@@ -88,6 +92,7 @@ namespace ShortRateTree
             };
             IsDiscountBondPriceMaturity = isLeftDiscountBondPriceMaturity;
             IsExerciseDate = isRightExerciseDate;
+            this.cashflow = cashflow;
             MinTreeTimeIndex = leftTreeTimeIndex;
             MaxTreeTimeIndex = leftTreeTimeIndex + TreeTimes.Length - 1;
             leftTreeTimeIndex = MaxTreeTimeIndex;
