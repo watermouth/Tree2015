@@ -210,6 +210,7 @@ namespace ShortRateTree
             /// ツリーの最終時点を満期とする割引債価格などの初期化
             tval = tvals.Last();
             columnNodes = _Tree._TreeNodes[tval.MaxTreeTimeIndex];
+            Debug.Assert(columnNodes != null, "InitializeTreeを先に実行してください");
             for (int j = 0; j < columnNodes.Length; ++j)
             {
                 columnNodes[j].DiscountBondPrice = 1D;
@@ -301,9 +302,9 @@ namespace ShortRateTree
         /// <summary>
         /// sigmaがシフトしたときのPVを計算する 
         /// </summary>
-        /// <param name="incrementRatio">もともとのsigmaに対するsigmaの増分率</param>
+        /// <param name="deltaSigma">sigmaの増分</param>
         /// <returns></returns>
-        public double ComputeSigmaShiftedPV(double incrementRatio)
+        public double ComputeSigmaShiftedPV(double deltaSigma)
         {
             /// シフト計算用のバミューダンスワップションオブジェクト
             /// ツリーは固有だが、ほかは共有。
@@ -313,7 +314,7 @@ namespace ShortRateTree
                 _SigmaShiftedSwaption.SetTreeTimes();/// treeは専用のものを作成。
             }
             /// shifted sigma
-            double[] shiftedSigma = _BKParameter_sigma.Select(x => x * (1 + incrementRatio)).ToArray();
+            double[] shiftedSigma = _BKParameter_sigma.Select(x => (x + deltaSigma)).ToArray();
             _SigmaShiftedSwaption.InitializeTree(_BKParameter_a, shiftedSigma);
             _SigmaShiftedSwaption.FitToBondPrices();
             return _SigmaShiftedSwaption.ComputePV();
