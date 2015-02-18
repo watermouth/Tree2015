@@ -44,7 +44,26 @@ namespace ShortRateTreeTest
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             sbs.InitializeTree(a, sigma);
-            sbs.FitToBondPrices(bondPrices);
+            sbs.SetBondPrices(bondPrices);
+            sbs.FitToBondPrices();
+            sbs.SetPayerOrReceiver(true);
+            Console.WriteLine("PV \t\t ={0}", sbs.ComputePV());
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0000));
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0001));
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0002));
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0003));
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0002));
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0001));
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0000));
+            stopWatch.Stop();
+            Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
+
+            Console.WriteLine("InitializeTree(double, double)");
+            stopWatch.Reset();
+            stopWatch.Start();
+            sbs.InitializeTree(a[0], sigma[0]);
+            sbs.SetBondPrices(bondPrices);
+            sbs.FitToBondPrices();
             sbs.SetPayerOrReceiver(true);
             Console.WriteLine("PV \t\t ={0}", sbs.ComputePV());
             Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0000));
@@ -93,7 +112,8 @@ namespace ShortRateTreeTest
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             sbs.InitializeTree(a, sigma);
-            sbs.FitToBondPrices(bondPrices);
+            sbs.SetBondPrices(bondPrices);
+            sbs.FitToBondPrices();
             sbs.SetPayerOrReceiver(true);
             Console.WriteLine("PV \t\t ={0}", sbs.ComputePV());
             Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0000));
@@ -142,7 +162,8 @@ namespace ShortRateTreeTest
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             sbs.InitializeTree(a, sigma);
-            sbs.FitToBondPrices(bondPrices);
+            sbs.SetBondPrices(bondPrices);
+            sbs.FitToBondPrices();
             sbs.SetPayerOrReceiver(true);
             Console.WriteLine("PV \t\t ={0}", sbs.ComputePV());
             Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0000));
@@ -192,7 +213,8 @@ namespace ShortRateTreeTest
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             sbs.InitializeTree(a, sigma);
-            sbs.FitToBondPrices(bondPrices);
+            sbs.SetBondPrices(bondPrices);
+            sbs.FitToBondPrices();
             sbs.SetPayerOrReceiver(false);
             Console.WriteLine("PV \t\t ={0}", sbs.ComputePV());
             Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0000));

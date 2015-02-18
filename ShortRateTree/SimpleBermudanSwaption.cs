@@ -158,19 +158,45 @@ namespace ShortRateTree
         /// <param name="sigma"></param>
         public void InitializeTree(double a, double sigma)
         {
-            SetTreeTimes();
-            _BKParameter_a = Enumerable.Repeat<double>(a, _Tree._TreeBackBones.Length).ToArray();
-            _BKParameter_sigma = Enumerable.Repeat<double>(sigma, _Tree._TreeBackBones.Length).ToArray();
+            if (_Tree == null) SetTreeTimes();
+            if (_BKParameter_a == null)
+            {
+                _BKParameter_a = Enumerable.Repeat<double>(a, _Tree._TreeBackBones.Length).ToArray();
+            }
+            else
+            {
+                for (int i = 0; i < _BKParameter_a.Length; ++i)
+                {
+                    _BKParameter_a[i] = a;
+                }
+            }
+            if (_BKParameter_sigma == null)
+            {
+                _BKParameter_sigma = Enumerable.Repeat<double>(sigma, _Tree._TreeBackBones.Length).ToArray();
+            }
+            else
+            {
+                for (int i = 0; i < _BKParameter_sigma.Length; ++i)
+                {
+                    _BKParameter_sigma[i] = sigma;
+                }
+            }
             InitializeTree(_BKParameter_a, _BKParameter_sigma);
         }
         /// <summary>
-        /// 割引債価格にツリーを合わせる. 事前条件：InitializeTree実行済みであること。
+        /// 割引債価格にツリーを合わせる. 事前条件：InitializeTree実行済みであること。SetBondPrice実行済みであること。
+        /// </summary>
+        public void FitToBondPrices()
+        {
+            _Tree.FitToInputBondPrice(_bondPrices);
+        }
+        /// <summary>
+        /// ツリーによる評価で用いる割引債価格配列
         /// </summary>
         /// <param name="bondPrices"></param>
-        public void FitToBondPrices(double[] bondPrices)
+        public void SetBondPrices(double[] bondPrices)
         {
             _bondPrices = bondPrices;
-            _Tree.FitToInputBondPrice(bondPrices);
         }
         /// <summary>
         /// 設定したバミューダンスワップションの現在価値計算
@@ -275,9 +301,9 @@ namespace ShortRateTree
         /// <summary>
         /// sigmaがシフトしたときのPVを計算する 
         /// </summary>
-        /// <param name="percentage"></param>
+        /// <param name="incrementRatio">もともとのsigmaに対するsigmaの増分率</param>
         /// <returns></returns>
-        public double ComputeSigmaShiftedPV(double percentage)
+        public double ComputeSigmaShiftedPV(double incrementRatio)
         {
             /// シフト計算用のバミューダンスワップションオブジェクト
             /// ツリーは固有だが、ほかは共有。
@@ -287,9 +313,9 @@ namespace ShortRateTree
                 _SigmaShiftedSwaption.SetTreeTimes();/// treeは専用のものを作成。
             }
             /// shifted sigma
-            double[] shiftedSigma = _BKParameter_sigma.Select(x => x * (1 + percentage)).ToArray();
+            double[] shiftedSigma = _BKParameter_sigma.Select(x => x * (1 + incrementRatio)).ToArray();
             _SigmaShiftedSwaption.InitializeTree(_BKParameter_a, shiftedSigma);
-            _SigmaShiftedSwaption.FitToBondPrices(_bondPrices);
+            _SigmaShiftedSwaption.FitToBondPrices();
             return _SigmaShiftedSwaption.ComputePV();
         }
 
