@@ -40,12 +40,11 @@ namespace ShortRateTree
         /// <param name="inputVs">各テナー構造・満期のヨーロピアンスワップションの価値</param>
         /// <param name="europeanSwaptions">キャリブレーション対象となるsigmaで生成されるツリーによるスワップション評価オブジェクト
         /// DivideTimeIntervalsまで実行済みであること。</param>
-        /// <param name="bondPrices">europeanSwaptionsそれぞれのツリー時点に対する債券価格の配列の配列
-        /// bondPrices[i]がi番目のeuropeanSwaptionのツリー時点に対する配列</param>
+        /// <param name="deltaSigma">sigmaに関するデルタ計算用のsigmaの増分</param>
         /// <returns></returns>
         static public double CalibrateTreeSigmaToSwaptionValues(
-            double[] inputVs, SimpleBermudanSwaption[] europeanSwaptions, double[][] bondPrices
-            , double a, double incrementRatio = 0.01, double initialSigma = 0.2D, double error = 1e-5)
+            double[] inputVs, SimpleBermudanSwaption[] europeanSwaptions
+            , double a, out double sigma, double deltaSigma = 0.01, double initialSigma = 0.2D, double error = 1e-5)
         {
             /// 目的関数
             /// sum_i (inputVs[i] - ツリーによるSwaption価値[i])^2
@@ -53,44 +52,100 @@ namespace ShortRateTree
             /// 1階微分を差分で離散近似して用いる。
 
             /// 目的関数
-            double J;
-            double sigma = initialSigma;
+            double J, prevJ;
+            /// 1階,2階微分
+            double J1 = 0D;
+            double J2 = 0D;
+            /// Levenberg-Marquard法のペナルティ係数
+            double c = 1e6;
+            sigma = initialSigma;
+            /// 初回計算
+            /// sigmaの設定とツリー計算準備
+            for (int i = 0; i < europeanSwaptions.Length; ++i)
+            {
+                europeanSwaptions[i].InitializeTree(a, sigma);
+                europeanSwaptions[i].FitToBondPrices();
+            }
+            /// 目的関数値などJの計算
+            ComputeSwaptionCalibrationObjectives(true, inputVs, europeanSwaptions, sigma, deltaSigma
+                , out prevJ, ref J1, ref J2);
+            /// sigma の変化分の算出とその値によるJの算出
+            double ds = -J1 / (c * J2);
             do
             {
+                double sigmaCandidate = sigma + ds > 0 ? sigma + ds : initialSigma;
                 /// sigmaの設定とツリー計算準備
+                for (int i = 0; i < europeanSwaptions.Length; ++i)
+                {
+                    europeanSwaptions[i].InitializeTree(a, sigmaCandidate);
+                    europeanSwaptions[i].FitToBondPrices();
+                }
+                /// 目的関数値などJの計算
+                ComputeSwaptionCalibrationObjectives(false, inputVs, europeanSwaptions, sigmaCandidate, deltaSigma
+                    , out J, ref J1, ref J2);
+                /// 比較と更新
+                if (J >= prevJ)
+                {
+                    c *= 10;
+                    /// sigma の変化分の算出とその値によるJの算出
+                    ds = -J1 / (c * J2);
+                    continue;
+                }
+                c /= 10;
+                prevJ = J;
+                sigma += ds;
                 for (int i = 0; i < europeanSwaptions.Length; ++i)
                 {
                     europeanSwaptions[i].InitializeTree(a, sigma);
                     europeanSwaptions[i].FitToBondPrices();
                 }
-                /// 桁落ちが出来るだけ起きないように差を最後にまとめておこなう
-                double positive0 = 0;
-                double negative0 = 0;
-                /// 1階微分の項
-                double positive1 = 0;
-                double negative1 = 0;
-                /// 2階微分の項
-                double positive2 = 0;
-                double negative2 = 0;
-                for (int i = 0; i < europeanSwaptions.Length; ++i)
+                ComputeSwaptionCalibrationObjectives(true, inputVs, europeanSwaptions, sigma, deltaSigma
+                    , out prevJ, ref J1, ref J2);
+                ds = -J1 / (c * J2);
+            } while (J > error);
+            return J;
+        }
+        static void ComputeSwaptionCalibrationObjectives(bool withDerivative
+            , double[] inputVs, SimpleBermudanSwaption[] europeanSwaptions
+            , double sigma, double deltaSigma, out double J, ref double J1, ref double J2)
+        {
+            /// 桁落ちが出来るだけ起きないように差を最後にまとめておこなう
+            double positive0 = 0;
+            double negative0 = 0;
+            ///// 1階微分の項
+            double positive1 = 0;
+            double negative1 = 0;
+            ///// 2階微分の項
+            double positive2 = 0;
+            double negative2 = 0;
+            for (int i = 0; i < europeanSwaptions.Length; ++i)
+            {
+                double v, vShift, iv2;
+                v = europeanSwaptions[i].ComputePV();
+                iv2 = (inputVs[i] * inputVs[i]);
+                positive0 += 1 + v * v / iv2;
+                negative0 += 2 * v / inputVs[i];
+                if (withDerivative)
                 {
-                    double v, vShift, iv2;
-                    v = europeanSwaptions[i].ComputePV();
-                    vShift = europeanSwaptions[i].ComputeSigmaShiftedPV(incrementRatio);
-                    iv2 = (inputVs[i] * inputVs[i]);
-                    positive0 += 1 + v * v / iv2;
-                    negative0 += 2 * v / inputVs[i];
+                    vShift = europeanSwaptions[i].ComputeSigmaShiftedPV(deltaSigma);
+                    //J1 += (1 - v / inputVs[i]) * (vShift - v) / (deltaSigma * inputVs[i]);
+                    //J2 += Math.Pow((vShift - v) / (deltaSigma * inputVs[i]), 2);
                     positive1 += v * (inputVs[i] + vShift) / iv2;
-                    negative1 += v * (vShift + v) / iv2;
+                    negative1 += (inputVs[i] * vShift + v * v) / iv2;
                     positive2 += (vShift * vShift + v * v) / iv2;
                     negative2 += 2 * vShift * v / iv2;
                 }
-                J = (positive0 - negative0) / 2;
-                double J1 = (positive1 - negative1) / incrementRatio;
-                double J2 = (positive2 - negative2) / (incrementRatio * incrementRatio);
-                sigma += -J1 / J2;
-            } while (J > error);
-            return J;
+            }
+            J = (positive0 - negative0) / 2;
+            if (withDerivative)
+            {
+                J1 = (positive1 - negative1) / (deltaSigma);
+                J2 = (positive2 - negative2) / (deltaSigma * deltaSigma);
+            }
+            if (Double.IsNaN(J))
+            {
+                J = Double.PositiveInfinity;
+            }
         }
     }
 }
