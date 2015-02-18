@@ -58,11 +58,12 @@ namespace ShortRateTree
         }
         public static string ToStringValuesHeader()
         {
-            return string.Format("j,k,pu,pm,pd,Q,r");
+            return string.Format("j,k,pu,pm,pd,Q,r,DiscountBondPrice,FixedLeg,FloatLeg,CC");
         }
         public string ToStringValues()
         {
-            return string.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}", j, k, pu, pm, pd, Q, r); 
+            return string.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}"
+                , j, k, pu, pm, pd, Q, r, DiscountBondPrice, FixedLegValue, FloatLegValue, ContingentClaimValue); 
         }
     }
 }
