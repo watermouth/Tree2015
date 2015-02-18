@@ -45,10 +45,10 @@ namespace ShortRateTree
             /// cashflow index
             int cashflowIndex = 0;
             Cashflow cf = cashflows[cashflowIndex];
-            /// 初回の扱い
             TimeInterval tval = new TimeInterval();
+            /// 初回の扱い : 権利行使日と基準日が一致するときも追加する
             if (tval.SetTimeInterval(baseDate, baseDate, exerciseDates[0], (double)divideIntervalDays[0],
-                false, true, cf, ref treeTimeIndex)) timeIntervals.Add(tval);
+                false, true, cf, ref treeTimeIndex, true)) timeIntervals.Add(tval);
             /// 2つめの権利行使時点から最後の権利行使時点まで。 
             for (int i = 1; i < exerciseDates.Length; ++i)
             {

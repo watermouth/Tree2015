@@ -53,8 +53,8 @@ namespace ShortRateTree
             if (DateTime.Compare(leftDate, rightDate) == 0)
             {
                 /// 分割なし
-                TreeTimes = new double[1];
-                TreeDates = new DateTime[1];
+                TreeDates = new DateTime[1]{leftDate};
+                TreeTimes = new double[1]{(TreeDates[0] - baseDate).TotalDays / 365D};
                 return false;
             }
             /// 分割
@@ -81,14 +81,15 @@ namespace ShortRateTree
         /// <param name="isLeftDiscountBondPriceMaturity"></param>
         /// <param name="isRightExerciseDate"></param>
         /// <param name="leftTreeTimeIndex"></param>
+        /// <param name="force">分割できないときも分割結果を取得するときはtrue（オプション引数デフォルトfalse）</param>
         public bool SetTimeInterval(DateTime baseDate, DateTime leftDate, DateTime rightDate, double divideIntervalDays
             , bool isLeftDiscountBondPriceMaturity, bool isRightExerciseDate
-            , Cashflow cashflow, ref int leftTreeTimeIndex)
+            , Cashflow cashflow, ref int leftTreeTimeIndex, bool force=false)
         {
             /// 分割できないときはfalse
             if (!DivideTimeInterval(baseDate, leftDate, rightDate, divideIntervalDays))
             {
-                return false;
+                if(!force) return false;
             };
             IsDiscountBondPriceMaturity = isLeftDiscountBondPriceMaturity;
             IsExerciseDate = isRightExerciseDate;
