@@ -17,10 +17,10 @@ namespace ShortRateTreeTest
         public void TestMethod1()
         {
             DateTime baseDate = new DateTime(2015, 2, 1);
-            int exerciseCount = 20;
-            int resetCount = 40;
+            int exerciseCount = 2;
+            int resetCount = 20;
             double swapRate = 0.01;
-            double divideInterval = 90;
+            double divideInterval = 60;
             Debug.Assert(resetCount >= exerciseCount);
             DateTime[] exerciseDates = Enumerable.Range(1, exerciseCount).Select(x => baseDate.AddMonths(x * 6)).ToArray();
             DateTime[] resetDates = Enumerable.Range(1, resetCount + 1).Select(x => baseDate.AddMonths(x * 6).AddDays(2)).ToArray();
@@ -45,6 +45,9 @@ namespace ShortRateTreeTest
             stopWatch.Start();
             sbs.InitializeTree(a, sigma);
             sbs.FitToBondPrices(bondPrices);
+            sbs.SetPayerOrReceiver(true);
+            Console.WriteLine("PV \t\t ={0}", sbs.ComputePV());
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0001));
             stopWatch.Stop();
             Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
@@ -100,7 +103,7 @@ namespace ShortRateTreeTest
             int exerciseCount = 20;
             int resetCount = 20;
             double swapRate = 0.01;
-            double divideInterval = 6;
+            double divideInterval = 30*3;
             Debug.Assert(resetCount >= exerciseCount);
             DateTime[] exerciseDates = Enumerable.Range(1, exerciseCount).Select(x => baseDate.AddMonths(x * 6)).ToArray();
             DateTime[] resetDates = Enumerable.Range(1, resetCount + 1).Select(x => baseDate.AddMonths(x * 6)).ToArray();
@@ -125,12 +128,13 @@ namespace ShortRateTreeTest
             stopWatch.Start();
             sbs.InitializeTree(a, sigma);
             sbs.FitToBondPrices(bondPrices);
+            sbs.SetPayerOrReceiver(true);
+            Console.WriteLine("PV \t\t ={0}", sbs.ComputePV());
+            Console.WriteLine("PVShifted \t ={0}", sbs.ComputeSigmaShiftedPV(0.0001));
             stopWatch.Stop();
             Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
             sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
-
-            Console.WriteLine("PV={0}", sbs.ComputePV(true));
         }
     }
 }

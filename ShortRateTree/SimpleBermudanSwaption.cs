@@ -12,14 +12,32 @@ namespace ShortRateTree
         //Tree tree;
         Cashflow[] _cashflows;
         public List<TimeInterval> timeIntervals;
+        private DateTime _baseDate;
         public DateTime[] _exerciseDates;
         public Tree _Tree;
+        private double[] _BKParameter_a;
+        private double[] _BKParameter_sigma;
+        private double[] _bondPrices;
+        private bool _IsPayersSwaption;
+        public SimpleBermudanSwaption _SigmaShiftedSwaption;
+        public void SetPayerOrReceiver(bool IsPayersSwaption)
+        {
+            _IsPayersSwaption = IsPayersSwaption;
+        }
+        /// <summary>
+        /// 評価対象バミューダンスワップション情報を用いてツリー分割区間を構成する
+        /// </summary>
+        /// <param name="baseDate"></param>
+        /// <param name="exerciseDates"></param>
+        /// <param name="cashflows"></param>
+        /// <param name="divideIntervalDays"></param>
         public void DivideTimeIntervals(DateTime baseDate, DateTime[] exerciseDates, Cashflow[] cashflows
             , double[] divideIntervalDays)
         {
             Debug.Assert(cashflows.Length <= divideIntervalDays.Length);
             Debug.Assert(exerciseDates.Length > 0);
             Debug.Assert(DateTime.Compare(baseDate, exerciseDates[0]) <= 0);
+            _baseDate = baseDate;
             _cashflows = cashflows;
             _exerciseDates = exerciseDates;
             timeIntervals = new List<TimeInterval>();
@@ -97,6 +115,7 @@ namespace ShortRateTree
         }
         /// <summary>
         /// 分割したTimeIntervalを用いて、ツリーの分割時点を設定・取得する。
+        /// 内部的に新たなTreeを作成する。
         /// </summary>
         public void SetTreeTimes()
         {
@@ -125,8 +144,42 @@ namespace ShortRateTree
         /// <param name="sigma"></param>
         public void InitializeTree(double[] a, double[] sigma)
         {
+            _BKParameter_a = (double[])a.Clone();
+            _BKParameter_sigma = (double[])sigma.Clone();
             _Tree.InitializeBackBones(a, sigma);
             _Tree.SetUpTreeNodes();
+        }
+        /// <summary>
+        /// 全期間一定のa, sigmaによりツリーを初期化する 
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="sigma"></param>
+        public void InitializeTree(double a, double sigma)
+        {
+            SetTreeTimes();
+            _BKParameter_a = Enumerable.Repeat<double>(a, _Tree._TreeBackBones.Length).ToArray();
+            _BKParameter_sigma = Enumerable.Repeat<double>(sigma, _Tree._TreeBackBones.Length).ToArray();
+            InitializeTree(_BKParameter_a, _BKParameter_sigma);
+        }
+        /// <summary>
+        /// sigmaがシフトしたときのPVを計算する 
+        /// </summary>
+        /// <param name="percentage"></param>
+        /// <returns></returns>
+        public double ComputeSigmaShiftedPV(double percentage)
+        {
+            /// シフト計算用のバミューダンスワップションオブジェクト
+            /// ツリーは固有だが、ほかは共有。
+            if (_SigmaShiftedSwaption == null)
+            {
+                _SigmaShiftedSwaption = (SimpleBermudanSwaption)this.MemberwiseClone();
+                _SigmaShiftedSwaption.SetTreeTimes();/// treeは専用のものを作成。
+            }
+            /// shifted sigma
+            double[] shiftedSigma = _BKParameter_sigma.Select(x => x * (1 + percentage)).ToArray();
+            _SigmaShiftedSwaption.InitializeTree(_BKParameter_a, shiftedSigma);
+            _SigmaShiftedSwaption.FitToBondPrices(_bondPrices);
+            return _SigmaShiftedSwaption.ComputePV();
         }
         /// <summary>
         /// 割引債価格にツリーを合わせる. 事前条件：InitializeTree実行済みであること。
@@ -134,14 +187,14 @@ namespace ShortRateTree
         /// <param name="bondPrices"></param>
         public void FitToBondPrices(double[] bondPrices)
         {
+            _bondPrices = bondPrices;
             _Tree.FitToInputBondPrice(bondPrices);
         }
         /// <summary>
         /// 設定したバミューダンスワップションの現在価値計算
         /// </summary>
-        /// <param name="IsPayersSwaption"></param>
         /// <returns>現在価値（=ツリーノード(0,0)のContingentClaimValue)</returns>
-        public double ComputePV(bool IsPayersSwaption)
+        public double ComputePV()
         {
             TreeNode[] columnNodes;
             TimeInterval[] tvals = timeIntervals.ToArray();
@@ -171,7 +224,7 @@ namespace ShortRateTree
                     {
                         /// IRS Value , Receivers Swaption
                         double IRS = columnNodes[j].FixedLegValue - columnNodes[j].FloatLegValue;
-                        if (IsPayersSwaption) IRS = -IRS;
+                        if (_IsPayersSwaption) IRS = -IRS;
                         /// CC Value
                         columnNodes[j].ContingentClaimValue = Math.Max(columnNodes[j].ContingentClaimValue, IRS);
                     }
@@ -208,13 +261,13 @@ namespace ShortRateTree
                     }
                 }
             }
-            return _Tree._TreeNodes[0][0].ContingentClaimValue; 
+            return _Tree._TreeNodes[0][0].ContingentClaimValue;
         }
         public void OneStepBackwardInduction(TreeNode[][] nodes, int i, int j)
         {
             TreeNode node = nodes[i][j];
             /// down, mid, up nodeの順に集計
-            int kIndex = node.k - _Tree._TreeBackBones[i+1].jMin; 
+            int kIndex = node.k - _Tree._TreeBackBones[i + 1].jMin;
             double expMinusRDeltaT = Math.Exp(-node.r * _Tree._TreeBackBones[i].dt);
             node.DiscountBondPrice = expMinusRDeltaT * (
                 node.pu * nodes[i + 1][kIndex + 1].DiscountBondPrice +
