@@ -25,7 +25,9 @@ namespace ShortRateTree
             _IsPayersSwaption = IsPayersSwaption;
         }
         /// <summary>
-        /// 評価対象バミューダンスワップション情報を用いてツリー分割区間を構成する
+        /// 評価対象バミューダンスワップション情報を用いてツリー分割区間を構成する.
+        /// 権利行使日と基準日が一致するとき、権利行使未実施かつ当日行使可能とみなして評価する。
+        /// 基準日当日の権利を失っているものとして評価するときは、その権利行使日を入力しないこと。
         /// </summary>
         /// <param name="baseDate"></param>
         /// <param name="exerciseDates"></param>
