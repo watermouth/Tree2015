@@ -164,26 +164,6 @@ namespace ShortRateTree
             InitializeTree(_BKParameter_a, _BKParameter_sigma);
         }
         /// <summary>
-        /// sigmaがシフトしたときのPVを計算する 
-        /// </summary>
-        /// <param name="percentage"></param>
-        /// <returns></returns>
-        public double ComputeSigmaShiftedPV(double percentage)
-        {
-            /// シフト計算用のバミューダンスワップションオブジェクト
-            /// ツリーは固有だが、ほかは共有。
-            if (_SigmaShiftedSwaption == null)
-            {
-                _SigmaShiftedSwaption = (SimpleBermudanSwaption)this.MemberwiseClone();
-                _SigmaShiftedSwaption.SetTreeTimes();/// treeは専用のものを作成。
-            }
-            /// shifted sigma
-            double[] shiftedSigma = _BKParameter_sigma.Select(x => x * (1 + percentage)).ToArray();
-            _SigmaShiftedSwaption.InitializeTree(_BKParameter_a, shiftedSigma);
-            _SigmaShiftedSwaption.FitToBondPrices(_bondPrices);
-            return _SigmaShiftedSwaption.ComputePV();
-        }
-        /// <summary>
         /// 割引債価格にツリーを合わせる. 事前条件：InitializeTree実行済みであること。
         /// </summary>
         /// <param name="bondPrices"></param>
@@ -292,6 +272,27 @@ namespace ShortRateTree
                 node.pd * nodes[i + 1][kIndex - 1].ContingentClaimValue
                 );
         }
+        /// <summary>
+        /// sigmaがシフトしたときのPVを計算する 
+        /// </summary>
+        /// <param name="percentage"></param>
+        /// <returns></returns>
+        public double ComputeSigmaShiftedPV(double percentage)
+        {
+            /// シフト計算用のバミューダンスワップションオブジェクト
+            /// ツリーは固有だが、ほかは共有。
+            if (_SigmaShiftedSwaption == null)
+            {
+                _SigmaShiftedSwaption = (SimpleBermudanSwaption)this.MemberwiseClone();
+                _SigmaShiftedSwaption.SetTreeTimes();/// treeは専用のものを作成。
+            }
+            /// shifted sigma
+            double[] shiftedSigma = _BKParameter_sigma.Select(x => x * (1 + percentage)).ToArray();
+            _SigmaShiftedSwaption.InitializeTree(_BKParameter_a, shiftedSigma);
+            _SigmaShiftedSwaption.FitToBondPrices(_bondPrices);
+            return _SigmaShiftedSwaption.ComputePV();
+        }
+
         public void OutputCsvExerciseDates(string filepath)
         {
             using (var sw = new System.IO.StreamWriter(filepath, false))
