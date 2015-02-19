@@ -18,7 +18,7 @@ namespace ShortRateTreeTest
         {
             DateTime baseDate = new DateTime(2015, 2, 1);
             int exerciseCount = 2;
-            int resetCount = 20;
+            int resetCount = 6;
             double swapRate = 0.01;
             double divideInterval = 60;
             Debug.Assert(resetCount >= exerciseCount);
@@ -77,6 +77,18 @@ namespace ShortRateTreeTest
             Console.WriteLine("{0}ms", stopWatch.ElapsedMilliseconds);
             sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
             sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
+
+            using (var sw = new System.IO.StreamWriter("PVSigma.csv", false))
+            {
+                double unit = 0.01;
+                sw.WriteLine("sigma,pv");
+                for (int i = 1; i <= 1D / unit; ++i)
+                {
+                    sbs.InitializeTree(a[0], i * unit);
+                    sbs.FitToBondPrices();
+                    sw.WriteLine("{0},{1}", i * unit, sbs.ComputePV());
+                }
+            }
         }
         /// <summary>
         /// 複数の権利行使日が1つのリセット日に対してあるもの 
@@ -138,7 +150,7 @@ namespace ShortRateTreeTest
             int exerciseCount = 1;
             int resetCount = 20;
             double swapRate = 0.01;
-            double divideInterval = 30*3;
+            double divideInterval = 30 * 3;
             Debug.Assert(resetCount >= exerciseCount);
             DateTime[] exerciseDates = Enumerable.Range(1, exerciseCount).Select(x => baseDate.AddMonths(x * 6)).ToArray();
             DateTime[] resetDates = Enumerable.Range(1, resetCount + 1).Select(x => baseDate.AddMonths(x * 6)).ToArray();
