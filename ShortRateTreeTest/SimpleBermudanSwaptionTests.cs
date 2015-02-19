@@ -20,11 +20,13 @@ namespace ShortRateTreeTest
             int exerciseCount = 2;
             int resetCount = 6;
             double swapRate = 0.01;
-            double divideInterval = 60;
+            double divideInterval = 30;
             Debug.Assert(resetCount >= exerciseCount);
             DateTime[] exerciseDates = Enumerable.Range(1, exerciseCount).Select(x => baseDate.AddMonths(x * 6)).ToArray();
             DateTime[] resetDates = Enumerable.Range(1, resetCount + 1).Select(x => baseDate.AddMonths(x * 6).AddDays(2)).ToArray();
             double[] divideIntervals = resetDates.Select(x => divideInterval).ToArray();
+            //divideIntervals[0] *= 0.1 * divideIntervals[0];
+            //divideIntervals[1] *= 0.1 * divideIntervals[1];
             List<Cashflow> cashflows = new List<Cashflow>();
             for (int i = 0; i < resetDates.Length - 1; ++i)
             {
@@ -78,15 +80,23 @@ namespace ShortRateTreeTest
             sbs._Tree.OutputCsvTreeBackBones("BermudanSwaptionTreeBackBones.csv");
             sbs._Tree.OutputCsvTreeNodes("BermudanSwaptionTreeNodes.csv");
 
+            SimpleBermudanSwaption sbs2 = new SimpleBermudanSwaption();
+            sbs2.DivideTimeIntervals(baseDate, exerciseDates, cashflows.ToArray()
+            , divideIntervals.Select(x => 0.5*x).ToArray());
+            sbs2.SetTreeTimes();
+            sbs2.SetBondPrices(sbs2.GetTreeTimes().Select(x => Math.Exp(-r * x)).ToArray());
+            sbs2.SetPayerOrReceiver(true);
             using (var sw = new System.IO.StreamWriter("PVSigma.csv", false))
             {
                 double unit = 0.01;
-                sw.WriteLine("sigma,pv");
+                sw.WriteLine("sigma,pv,pv2");
                 for (int i = 1; i <= 1D / unit; ++i)
                 {
                     sbs.InitializeTree(a[0], i * unit);
                     sbs.FitToBondPrices();
-                    sw.WriteLine("{0},{1}", i * unit, sbs.ComputePV());
+                    sbs2.InitializeTree(a[0], i * unit);
+                    sbs2.FitToBondPrices();
+                    sw.WriteLine("{0},{1},{2}", i * unit, sbs.ComputePV(), sbs2.ComputePV());
                 }
             }
         }

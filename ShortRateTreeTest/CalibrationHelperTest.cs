@@ -45,7 +45,7 @@ namespace ShortRateTreeTest
             double swapRate = 0.01;
             double divideInterval = 6;
             double r = 0.01;
-            double a = 0.005;
+            double a = 0.0005;
             double sigma = 0.5;
 
             /// キャリブレーション用ツリーによるヨーロピアンスワップション評価オブジェクトの用意
@@ -70,8 +70,8 @@ namespace ShortRateTreeTest
             }
             /// ダミーの市場価格
             /// 本当はボラから計算する必要がある。
-            double[] PVs = sbss.Select(x => 0.02).ToArray();
-            double error = CalibrationHelper.CalibrateTreeSigmaToSwaptionValues(PVs, sbss, a, out sigma, 0.001, 0.1);
+            double[] PVs = sbss.Select(x => 0.01D).ToArray();
+            double error = CalibrationHelper.CalibrateTreeSigmaToSwaptionValues(PVs, sbss, a, out sigma, 0.1, 0.9);
             Console.WriteLine("sigma = {0}, error = {1}", sigma, error);
             for (int i = 0; i < sbss.Length; ++i)
             {

@@ -74,12 +74,14 @@ namespace ShortRateTree
                 /// 比較と更新 : 行き過ぎなので増分を変更してやりなおし
                 if (J > prevJ)
                 {
-                    c *= 10;
+                    //c *= 10;
+                    c *= 2;
                     /// sigma の変化分の算出とその値によるJの算出
                     ds = -J1 / ((1 + c) * J2);
                     continue;
                 }
-                c /= 10;
+                    //c *= 10;
+                c /= 2;
                 prevJ = J;
                 sigma += ds;
                 ComputeSwaptionCalibrationObjectives(true, inputVs, europeanSwaptions, a, sigma, deltaSigma
@@ -128,10 +130,10 @@ namespace ShortRateTree
                 }
                 ///// 1階微分の項
                 J1 = (shiftedJs[1] - shiftedJs[0]) / (deltaSigma);
-                if (shiftedJs[1] - J > 10 * (J - shiftedJs[0]))
-                {
-                    J1 = 0.5 * (shiftedJs[1] + shiftedJs[1] - 2 * J) / (deltaSigma);
-                }
+                //if (shiftedJs[1] - J > 10 * (J - shiftedJs[0]))
+                //{
+                //    J1 = 0.5 * (shiftedJs[1] + shiftedJs[1] - 2 * J) / (deltaSigma);
+                //}
                 ///// 2階微分の項
                 J2 = 4 * (shiftedJs[1] + shiftedJs[0] - 2 * J) / (deltaSigma * deltaSigma);
             }
