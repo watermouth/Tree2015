@@ -42,7 +42,7 @@ namespace ShortRateTreeTest
         public void TestMethod2()
         {
             DateTime baseDate = new DateTime(2015, 2, 1);
-            double swapRate = 0.01;
+            double swapRate = 0.001;
             double divideInterval = 6;
             double r = 0.01;
             double a = 0.0005;
@@ -70,9 +70,9 @@ namespace ShortRateTreeTest
             }
             /// ダミーの市場価格
             /// 本当はボラから計算する必要がある。
-            double[] PVs = sbss.Select(x => 0.01D).ToArray();
-            double error = CalibrationHelper.CalibrateTreeSigmaToSwaptionValues(PVs, sbss, a, out sigma, 0.1, 0.9);
-            Console.WriteLine("sigma = {0}, error = {1}", sigma, error);
+            double[] PVs = sbss.Select(x => 0.0001D).ToArray();
+            CalibrationHelper.CalibrateToSwaptionValues(PVs, sbss, a, sigma, out a, out sigma);
+            Console.WriteLine("a={0}, sigma={1}", a, sigma);
             for (int i = 0; i < sbss.Length; ++i)
             {
                 Console.WriteLine("PV{0}={1}", i, sbss[i]._Tree._TreeNodes[0][0].ContingentClaimValue);

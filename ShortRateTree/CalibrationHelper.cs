@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.SolverFoundation.Solvers;
+using Microsoft.SolverFoundation.Common;
 
 namespace ShortRateTree
 {
@@ -34,8 +36,26 @@ namespace ShortRateTree
                     , swapRate);
             }
         }
+        static public void CalibrateToSwaptionValues(double[] inputVs
+            , SimpleBermudanSwaption[] europeanSwaptions
+            , double init_a, double init_sigma, out double a, out double sigma)
+        {
+            double[] xInitial = new double[] { init_a, init_sigma };
+            double[] xLower = new double[] { 0, 1e-4 };
+            double[] xUpper = new double[] { 0.01, 10 };
+            var solution = NelderMeadSolver.Solve(x =>
+            {
+                double J, J1=0D, J2=0D;
+                ComputeSwaptionCalibrationObjectives(false, inputVs, europeanSwaptions, x[0], x[1], 0D, out J, ref J1, ref J2);
+                Console.WriteLine("J={0},a={1},sigma={2}", J, x[0], x[1]);
+                return J;
+            }, xInitial, xLower, xUpper);
+            a = solution.GetValue(1);
+            sigma = solution.GetValue(2);
+            Console.WriteLine(solution.ToString());
+        }
         /// <summary>
-        /// 1次元版Levenberg-Marquardt法によるsigmaの探索
+        /// 1次元版Levenberg-Marquardt法によるsigmaの探索 : 未完
         /// </summary>
         /// <param name="inputVs">各テナー構造・満期のヨーロピアンスワップションの価値</param>
         /// <param name="europeanSwaptions">キャリブレーション対象となるsigmaで生成されるツリーによるスワップション評価オブジェクト
@@ -112,9 +132,9 @@ namespace ShortRateTree
                 negative0 += 2 * v / inputVs[i];
             }
             J = (positive0 - negative0) / 2;
-            double[] shiftedJs = new double[2];
             if (withDerivative)
             {
+                double[] shiftedJs = new double[2];
                 double[] deltaSigmas = new double[] { -deltaSigma * 0.5, deltaSigma * 0.5 };
                 for (int j = 0; j < deltaSigmas.Length; ++j)
                 {
@@ -130,10 +150,6 @@ namespace ShortRateTree
                 }
                 ///// 1階微分の項
                 J1 = (shiftedJs[1] - shiftedJs[0]) / (deltaSigma);
-                //if (shiftedJs[1] - J > 10 * (J - shiftedJs[0]))
-                //{
-                //    J1 = 0.5 * (shiftedJs[1] + shiftedJs[1] - 2 * J) / (deltaSigma);
-                //}
                 ///// 2階微分の項
                 J2 = 4 * (shiftedJs[1] + shiftedJs[0] - 2 * J) / (deltaSigma * deltaSigma);
             }
