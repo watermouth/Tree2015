@@ -12,7 +12,7 @@ namespace ShortRateTree
     {
         /// <summary>
         /// 標準的なヨーロピアンスワップションの簡易化された条件を取得する.
-        ///
+        /// スワップレートは後で設定すること。
         /// リセット日の日付調整は実施していない。
         /// 利払い日が次のCFのリセット日になっている。
         /// 権利行使日はリセット日に一致させる。 
@@ -21,10 +21,9 @@ namespace ShortRateTree
         /// <param name="startResetDate"></param>
         /// <param name="resetIntervalMonths"></param>
         /// <param name="cashflowNumber"></param>
-        /// <param name="swapRate"></param>
         /// <param name="exerciseDate"></param>
         /// <param name="cashflows"></param>
-        static public void GetSwaptionCondition(DateTime startResetDate, int resetIntervalMonths, int cashflowNumber, double swapRate
+        static public void GetSwaptionCondition(DateTime startResetDate, int resetIntervalMonths, int cashflowNumber 
             , out DateTime[] exerciseDate, out Cashflow[] cashflows)
         {
             exerciseDate = new DateTime[1] { startResetDate };
@@ -33,8 +32,24 @@ namespace ShortRateTree
             {
                 cashflows[i] = new Cashflow(startResetDate.AddMonths(resetIntervalMonths * i)
                     , startResetDate.AddMonths(resetIntervalMonths * (i + 1))
-                    , swapRate);
+                    , 0D);
             }
+        }
+        /// <summary>
+        /// フォワードスワップレート算出 簡易用
+        /// Cashflowに設定するフォワードスワップレートを求めるために使う。
+        /// テスト実行用に用意した関数であり、既存機能で設定可能ならそれでよい。
+        /// </summary>
+        /// <param name="bondPrices">各CashflowのResetDate, 最後のCFのSettlementDateに対する割引債価格</param>
+        /// <returns></returns>
+        static public double GetForwardSwapRate(double[] bondPrices, double[] yearFractions)
+        {
+            double denom = 0;
+            for (int i = 0; i < yearFractions.Length - 1; ++i)
+            {
+                denom += bondPrices[i+1] * yearFractions[i]; 
+            }
+            return (bondPrices[0] - bondPrices[bondPrices.Length - 1]) / denom;
         }
         static public void CalibrateToSwaptionValues(double[] inputVs
             , SimpleBermudanSwaption[] europeanSwaptions
