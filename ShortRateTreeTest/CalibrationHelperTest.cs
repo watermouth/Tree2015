@@ -45,19 +45,19 @@ namespace ShortRateTreeTest
         public void TestMethod2()
         {
             DateTime baseDate = new DateTime(2015, 2, 1);
-            double divideInterval = 10;
+            double divideInterval = 30;
             double r = 0.01;
 
             /// キャリブレーション用ツリーによるヨーロピアンスワップション評価オブジェクトの用意
-            int cashflowNumber = 20;
-            int resetIntervalMonths = 12;
-            SimpleBermudanSwaption[] sbss = new SimpleBermudanSwaption[cashflowNumber-1];
-            for (int i = 1; i < cashflowNumber; ++i)
+            int cashflowNumber = 1;
+            int resetIntervalMonths = 6;
+            SimpleBermudanSwaption[] sbss = new SimpleBermudanSwaption[cashflowNumber];
+            for (int i = 1; i <= cashflowNumber; ++i)
             {
                 DateTime[] exerciseDates;
                 Cashflow[] cashflows;
                 CalibrationHelper.GetSwaptionCondition(baseDate.AddMonths(resetIntervalMonths * i)
-                    , resetIntervalMonths, cashflowNumber-i, out exerciseDates, out cashflows);
+                    , resetIntervalMonths, cashflowNumber-i+1, out exerciseDates, out cashflows);
                 /// スワップレートの設定
                 List<double> bondPricesAtCashflowDates = cashflows.Select(x => Math.Exp(-r * (x.ResetDate - baseDate).Days / 365D)).ToList();
                 bondPricesAtCashflowDates.Add(Math.Exp(-r * (cashflows.Last().SettlementDate - baseDate).Days / 365D));
@@ -78,15 +78,20 @@ namespace ShortRateTreeTest
             }
             /// ダミーの市場価格
             /// 本当はボラから計算する必要がある。
-            double[] PVs = sbss.Select(x => 0.00005D).ToArray();
+            double[] PVs = sbss.Select(x => 0.001D).ToArray();
             double a, sigma;
             CalibrationHelper.CalibrateToSwaptionValues(PVs, sbss, 0, 0.2D, out a, out sigma);
             Console.WriteLine("a={0}, sigma={1}", a, sigma);
             for (int i = 0; i < sbss.Length; ++i)
             {
                 sbss[i].OutputCsvCashflows(string.Format("ESwaptionCashflow{0}.csv", i));
+                sbss[i].OutputCsvExerciseDates(string.Format("ESwaptionExerciseDates{0}.csv", i));
                 Console.WriteLine("{0}, Input : {1}, Fitted : {2}", i, PVs[i], sbss[i]._Tree._TreeNodes[0][0].ContingentClaimValue);
             }
+            /// 目的関数のsigma依存性を見る
+            CalibrationHelper.OutputCsvCalibrationObjectiveValues("Js.csv", PVs, sbss
+            , Enumerable.Range(1, 100).Select(x => 0.01D * x).ToArray()
+            , Enumerable.Range(1, 100).Select(x => 0.01D * x).ToArray());
         }
         /// <summary>
         /// スワップレートの確認
