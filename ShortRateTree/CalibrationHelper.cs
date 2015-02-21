@@ -57,11 +57,11 @@ namespace ShortRateTree
         {
             double[] xInitial = new double[] { init_a, init_sigma };
             double[] xLower = new double[] { 0, 1e-4 };
-            double[] xUpper = new double[] { 0.01, 10 };
+            double[] xUpper = new double[] { 10, 10 };
             var solution = NelderMeadSolver.Solve(x =>
             {
                 double J, J1=0D, J2=0D;
-                ComputeSwaptionCalibrationObjectives(false, inputVs, europeanSwaptions, x[0], x[1], 0D, out J, ref J1, ref J2);
+                ComputeSwaptionCalibrationObjectives(false, inputVs, europeanSwaptions, x[0], x[1], out J, ref J1, ref J2);
                 Console.WriteLine("J={0},a={1},sigma={2}", J, x[0], x[1]);
                 return J;
             }, xInitial, xLower, xUpper);
@@ -96,7 +96,7 @@ namespace ShortRateTree
             sigma = initialSigma;
             /// 初回計算
             /// 目的関数値などJの計算
-            ComputeSwaptionCalibrationObjectives(true, inputVs, europeanSwaptions, a, sigma, deltaSigma
+            ComputeSwaptionCalibrationObjectives(true, inputVs, europeanSwaptions, a, sigma
                 , out prevJ, ref J1, ref J2);
             /// sigma の変化分の算出とその値によるJの算出
             double ds = -J1 / ((1 + c) * J2);
@@ -104,7 +104,7 @@ namespace ShortRateTree
             {
                 double sigmaCandidate = sigma + ds > 0 ? sigma + ds : initialSigma;
                 /// 目的関数値などJの計算
-                ComputeSwaptionCalibrationObjectives(false, inputVs, europeanSwaptions, a, sigmaCandidate, deltaSigma
+                ComputeSwaptionCalibrationObjectives(false, inputVs, europeanSwaptions, a, sigmaCandidate
                     , out J, ref J1, ref J2);
                 /// 比較と更新 : 行き過ぎなので増分を変更してやりなおし
                 if (J > prevJ)
@@ -119,15 +119,27 @@ namespace ShortRateTree
                 c /= 2;
                 prevJ = J;
                 sigma += ds;
-                ComputeSwaptionCalibrationObjectives(true, inputVs, europeanSwaptions, a, sigma, deltaSigma
+                ComputeSwaptionCalibrationObjectives(true, inputVs, europeanSwaptions, a, sigma 
                     , out prevJ, ref J1, ref J2);
                 ds = -J1 / ((1 + c) * J2);
             } while (J > error);
             return J;
         }
-        static void ComputeSwaptionCalibrationObjectives(bool withDerivative
+        /// <summary>
+        /// キャリブレーション用目的関数値の計算
+        /// </summary>
+        /// <param name="withDerivative"></param>
+        /// <param name="inputVs"></param>
+        /// <param name="europeanSwaptions"></param>
+        /// <param name="a"></param>
+        /// <param name="sigma"></param>
+        /// <param name="J"></param>
+        /// <param name="J1"></param>
+        /// <param name="J2"></param>
+        /// <param name="deltaSigma"></param>
+        static public void ComputeSwaptionCalibrationObjectives(bool withDerivative
             , double[] inputVs, SimpleBermudanSwaption[] europeanSwaptions
-            , double a, double sigma, double deltaSigma, out double J, ref double J1, ref double J2)
+            , double a, double sigma, out double J, ref double J1, ref double J2, double deltaSigma=0D)
         {
             /// sigmaの設定とツリー計算準備
             for (int i = 0; i < europeanSwaptions.Length; ++i)
@@ -167,6 +179,24 @@ namespace ShortRateTree
                 J1 = (shiftedJs[1] - shiftedJs[0]) / (deltaSigma);
                 ///// 2階微分の項
                 J2 = 4 * (shiftedJs[1] + shiftedJs[0] - 2 * J) / (deltaSigma * deltaSigma);
+            }
+        }
+        static public void OutputCsvCalibrationObjectiveValues(string filepath
+            , double[] inputVs, SimpleBermudanSwaption[] europeanSwaptions
+            , double[] a, double[] sigma) 
+        {
+            using (var sw = new System.IO.StreamWriter(filepath, false))
+            {
+                sw.WriteLine("a,sigma,J");
+                foreach (double aa in a)
+                {
+                    foreach (double ss in sigma)
+                    {
+                        double J, J1=0, J2=0;
+                        ComputeSwaptionCalibrationObjectives(false, inputVs, europeanSwaptions, aa, ss, out J, ref J1, ref J2);
+                        sw.WriteLine("{0},{1},{2}", aa, ss, J);
+                    }
+                }
             }
         }
     }
