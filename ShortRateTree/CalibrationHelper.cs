@@ -69,6 +69,23 @@ namespace ShortRateTree
             sigma = solution.GetValue(2);
             Console.WriteLine(solution.ToString());
         }
+        static public void CalibrateToSwaptionValues(double[] inputVs
+            , SimpleBermudanSwaption[] europeanSwaptions
+            , double a, double init_sigma, out double sigma)
+        {
+            double[] xInitial = new double[] { init_sigma };
+            double[] xLower = new double[] { 1e-4 };
+            double[] xUpper = new double[] { 10 };
+            var solution = NelderMeadSolver.Solve(x =>
+            {
+                double J, J1=0D, J2=0D;
+                ComputeSwaptionCalibrationObjectives(false, inputVs, europeanSwaptions, a, x[0], out J, ref J1, ref J2);
+                Console.WriteLine("J={0},sigma={1}", J, x[0]);
+                return J;
+            }, xInitial, xLower, xUpper);
+            sigma = solution.GetValue(1);
+            Console.WriteLine(solution.ToString());
+        }
         /// <summary>
         /// 1次元版Levenberg-Marquardt法によるsigmaの探索 : 未完
         /// </summary>

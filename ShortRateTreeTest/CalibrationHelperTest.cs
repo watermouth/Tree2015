@@ -68,6 +68,7 @@ namespace ShortRateTreeTest
                 foreach (Cashflow cf in cashflows) cf.SwapRate = swapRate;
                 /// スワップションオブジェクトの生成
                 double[] divideIntervals = cashflows.Select(x => divideInterval).ToArray();
+                divideIntervals[0] /= 3;
                 SimpleBermudanSwaption sbs = new SimpleBermudanSwaption();
                 sbs.DivideTimeIntervals(baseDate, exerciseDates, cashflows, divideIntervals);
                 double[] times = sbs.GetTreeTimes();
@@ -78,9 +79,14 @@ namespace ShortRateTreeTest
             }
             /// ダミーの市場価格
             /// 本当はボラから計算する必要がある。
-            double[] PVs = sbss.Select(x => 0.001D).ToArray();
+            double[] PVs = sbss.Select(x => 0.01D).ToArray();
             double a, sigma;
-            CalibrationHelper.CalibrateToSwaptionValues(PVs, sbss, 0, 0.2D, out a, out sigma);
+            a = 0.005;
+            sigma = 0.01;
+            // a, sigmaでcalibration
+            //CalibrationHelper.CalibrateToSwaptionValues(PVs, sbss, 0, 0.2D, out a, out sigma);
+            /// sigmaのみでcalibration
+            CalibrationHelper.CalibrateToSwaptionValues(PVs, sbss, a, sigma, out sigma);
             Console.WriteLine("a={0}, sigma={1}", a, sigma);
             for (int i = 0; i < sbss.Length; ++i)
             {
